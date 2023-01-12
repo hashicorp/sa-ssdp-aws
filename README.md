@@ -87,8 +87,8 @@ git clone https://github.com/hashicorp/sa-ssp-aws.git
 Just like the AWS CLI tool, the Terraform Provider for AWS *requires* both the `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`. Export these values, e.g.:
 
 ```sh
-export AWS_ACCESS_KEY_ID=AKIA3VS7LW7HGXGSKWGK
-export AWS_SECRET_ACCESS_KEY=usuVsOn4LiX3DWw+k93oZhERaPz+rZ03PfvTaNU2
+export AWS_ACCESS_KEY_ID=<aws_access_key_id>
+export AWS_SECRET_ACCESS_KEY=<aws_secret_access_key>
 ```
 
 #### 3. Generate Enterprise Licences
