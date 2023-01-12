@@ -1,0 +1,2 @@
+vpc_id = "<vpc_id>"
+eks_cluster_name = "<eks_cluster_name>"
