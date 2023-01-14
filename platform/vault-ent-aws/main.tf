@@ -99,4 +99,5 @@ module "aws_secrets" {
   source = "./modules/aws_secrets"
 
   resource_name_prefix = var.resource_name_prefix
+  shared_san           = module.loadbalancer.vault_lb_dns_name
 }

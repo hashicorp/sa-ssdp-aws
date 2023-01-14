@@ -41,3 +41,8 @@ output "vault_sg_id" {
   description = "Security group ID of Vault cluster"
   value       = module.vm.vault_sg_id
 }
+
+output "cert_pem" {
+  description = "CA for vault server cert verification"
+  value     = module.aws_secrets.cert_pem
+}

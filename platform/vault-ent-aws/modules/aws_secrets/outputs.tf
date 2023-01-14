@@ -17,3 +17,8 @@ output "secrets_manager_arn" {
   description = "ARN of secrets_manager secret"
   value       = aws_secretsmanager_secret.tls.arn
 }
+
+output "cert_pem" {
+  description = "CA for vault server cert verification"
+  value     = tls_self_signed_cert.ca.cert_pem
+}
