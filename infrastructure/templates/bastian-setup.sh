@@ -39,12 +39,14 @@ rm session-manager-plugin.deb
 # public_ipv4="$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4)"
 # instance="$(curl -s http://169.254.169.254/latest/meta-data/instance-id)"
 
-cd /home/ubuntu
+export HOME=/home/ubuntu
+cd $HOME
+git config --global --add safe.directory $HOME/sa-ssp-aws
 git clone https://github.com/hashicorp/sa-ssp-aws.git
-sudo chown -R ubuntu:ubuntu sa-ssp-aws
 cd sa-ssp-aws
 #git checkout n8-TryingToMakeItWork  
-git config --global --add safe.directory /home/ubuntu/sa-ssp-aws
+#git config --global --add safe.directory /home/ubuntu/sa-ssp-aws
 git checkout ${sa_release_version} #//FIXME: Change to release tag for GA!
+sudo chown -R ubuntu:ubuntu $HOME/sa-ssp-aws
 
 exit 0
