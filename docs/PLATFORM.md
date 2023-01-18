@@ -8,9 +8,12 @@ In this section you will deploy two Auto Scale Groups (ASGs) of five EC2 servers
 
 ### 1. Prepare for terraform deployment
 
-With your AWS credentials exported, and the correct information added to your `sa-ssp-aws/platform/vault-ent-aws/terraform.tfvars` from the steps above, you should now be able to run:
+With your AWS credentials exported, and the correct information added to your `$HOME/sa-ssp-aws/platform/vault-ent-aws/terraform.tfvars` from the steps above, you should now be able to run:
+
+//TODO: ensure only the required information is added to the `sa-ssp-aws/inputs/terraform.tf-platform`
 
 ```sh
+cd $HOME/sa-ssp-aws/platform/vault-ent-aws
 terraform init
 terraform plan
 ```
@@ -25,18 +28,42 @@ Upon successful completion you should see:
 
 ```hcl
 asg_name = "sa-vault"
-kms_key_arn = "arn:aws:kms:us-west-2:652626842611:key/10a8c141-d359-495b-92fc-546fa00ff109"
-launch_template_id = "lt-0bb553c46288080c6"
-vault_lb_arn = "arn:aws:elasticloadbalancing:us-west-2:652626842611:loadbalancer/app/sa-vault-lb/1e4797b210ca679f"
-vault_lb_dns_name = "internal-sa-vault-lb-1711292900.us-west-2.elb.amazonaws.com"
-vault_lb_zone_id = "Z1H1FL5HABSF5"
-vault_sg_id = "sg-0528380228b1666ce"
-vault_target_group_arn = "arn:aws:elasticloadbalancing:us-west-2:652626842611:targetgroup/sa-vault-tg/fbfde0da72d05fcf"
+cert_pem = <<EOT
+-----BEGIN CERTIFICATE-----
+...
+-----END CERTIFICATE-----
+
+EOT
+kms_key_arn = "arn:aws:kms:us-west-2:491229875064:key/bb2919c2-3dbc-40d8-8202-16c1b4c4582f"
+launch_template_id = "lt-0ea7c56aae2ac149a"
+vault_lb_arn = "arn:aws:elasticloadbalancing:us-west-2:491229875064:loadbalancer/net/sa-vault-lb/684ff521ebea47e4"
+vault_lb_dns_name = "sa-vault-lb-684ff521ebea47e4.elb.us-west-2.amazonaws.com"
+vault_lb_zone_id = "Z18D5FSROUN65G"
+vault_sg_id = "sg-0cc56350d80b48eb0"
+vault_target_group_arn = "arn:aws:elasticloadbalancing:us-west-2:491229875064:targetgroup/sa-vault-tg/8f1285b19eb20e32"
 ```
 
 You will need the `vault_lb_dns_name` value in the following steps.
 
-### 2. Verify Vault Scale Group
+Save the Vault CA locally:
+```sh
+terraform output -raw cert_pem > $HOME/sa-ssp-aws/inputs/vault-ca.pem
+```
+
+Add the VAULT_CACERT and VAULT_ADDR environment variables to you `~/.bashrc`:
+
+```sh
+echo "export VAULT_CACERT=$HOME/sa-ssp-aws/inputs/vault-ca.pem" >> ~/.bashrc
+echo "export VAULT_ADDR=https://$(terraform output -raw vault_lb_dns_name):8200" >> ~/.bashrc
+source ~/.bashrc
+```
+
+Verify with `vault status`
+
+**NOTE:** Vault is currently: `Sealed: true`
+
+
+### 2. Verify Vault Scale Group (OPTIONAL)
 
 Using the AWS 'Secure Session Manager' (`aws ssm`) command, connect to a Vault instance and verify the Vault Cluster is running and healthy.
 
@@ -46,13 +73,13 @@ Using the AWS Auto Scaling Group (ASG) name in the above terraform output, get t
 aws autoscaling describe-auto-scaling-groups --auto-scaling-group-names `terraform output -raw asg_name` --no-cli-pager --query "AutoScalingGroups[*].Instances[*].InstanceId"
 ```
 
-Select an instance ID from the list.
+Select an instance ID from the list and execute:
 
 ```sh
 aws ssm start-session --target <instance_id>
 ```
 
-Export the following two variables so that you can interact with Vault:
+To interact with Vault within a Vault cluster instance shell session you must export the following two variables:
 ```sh
 export VAULT_ADDR="https://127.0.0.1:8200"
 export VAULT_CACERT="/opt/vault/tls/vault-ca.pem"
@@ -63,7 +90,7 @@ Verify Vault is running with:
 vault status
 ```
 
-**NOTE:** Vault is currently: `Sealed: true`
+Exit the shell session with the Vault cluster instance before continuing.
 
 ### 3. Initialize Vault Cluster
 
@@ -73,10 +100,29 @@ vault status
 vault operator init
 ```
 
-**NOTE** Copy the `Recovery Keys` and the `Initial Root Token` for future steps.
+**NOTE** Copy the `Recovery Keys` and the `Initial Root Token` somewhere safe for future steps.
+
+Export the Vault Token to provide appropriate permissions for following commands:
 
 ```sh
 export VAULT_TOKEN=<initial_root_token>
+```
+
+Verify token permissions with the following:
+
+```sh
+vault operator raft list-peers
+```
+
+You should see something like:
+```sh
+Node                   Address              State       Voter
+----                   -------              -----       -----
+i-039ae7e6ddeb59b4d    10.0.102.121:8201    leader      true
+i-0e238e7297f0d2b52    10.0.101.145:8201    follower    true
+i-0d5546d3eeb23df85    10.0.103.55:8201     follower    true
+i-0560234cb583fb773    10.0.103.35:8201     follower    true
+i-0a403b210f7af110a    10.0.102.179:8201    follower    true
 ```
 
 Unseal Vault:
@@ -117,30 +163,10 @@ Last WAL                 27
 
 **NOTE:** Vault is now: `Sealed: false` and ready for use.
 
-//FIXME: exit the vault `aws ssm` session. How do I get local vault
-```sh
-vault operator raft list-peers
-```
-
-You should see something like:
-```sh
-Node                   Address              State       Voter
-----                   -------              -----       -----
-i-039ae7e6ddeb59b4d    10.0.102.121:8201    leader      true
-i-0e238e7297f0d2b52    10.0.101.145:8201    follower    true
-i-0d5546d3eeb23df85    10.0.103.55:8201     follower    true
-i-0560234cb583fb773    10.0.103.35:8201     follower    true
-i-0a403b210f7af110a    10.0.102.179:8201    follower    true
-```
-
-**NOTE:** Repeat this to unseal each Vault instance in the scale group
-
+**NOTE:** Repeat this to unseal each Vault instance in the scale group //FIXME: but do I do this?
 
 
 ### 3. Configure Vault for Consul Gossip Key
-//TODO: **YOU ARE HERE** Everything above works.
-
-https://developer.hashicorp.com/consul/tutorials/vault-secure/vault-pki-consul-secure-tls
 
 ### n. Enable Vault Secrets Engine
 
@@ -149,19 +175,11 @@ vault secrets enable -path=consul kv-v2
 ```
 
 
-Copy the local `../../inputs/consul.hclic` to the Vault ASG instance:
-
-```sh
-cd ~
-mkdir tmp
-vi consul.hclic
-```
-
-Paste the contents of your locally saved Consul license located: `../../inputs/consul.hclic`
+Paste the contents of your locally saved Consul license located: `$HOME/sa-ssp-aws/inputs/consul.hclic`
 
 Store Consul license in Vault:
 ```sh
-vault kv put consul/secret/enterpriselicense key="$(cat ./consul.hclic)"
+vault kv put consul/secret/enterpriselicense key="$(cat $HOME/sa-ssp-aws/inputs/consul.hclic)"
 ```
 
 You should see a response resembling:
@@ -180,14 +198,16 @@ destroyed          false
 version            1
 ```
 
+You can read the license with:
+```sh
+vault kv get consul/secret/enterpriselicense
+```
 
 Store Consul Gossip Key in Vault - substituting the Consul Gossip Key generated earlier:
 
 ```sh
-vault kv put consul/secret/gossip gossip="<consul_gossip_key>"
+vault kv put consul/secret/gossip gossip="$(consul keygen)"
 ```
-
-For example: `vault kv put consul/secret/gossip gossip="mpO9YcSq+YnOqK2Prd0igm2kQObneGCjspOfi7JSH70="`
 
 The respose should resemble:
 
@@ -203,6 +223,11 @@ custom_metadata    <nil>
 deletion_time      n/a
 destroyed          false
 version            1
+```
+
+OPTIONAL: Verify with:
+```sh
+vault kv get consul/secret/gossip
 ```
 
 
@@ -254,14 +279,35 @@ vault secrets enable -path connect-root pki
 ```
 
 
+### n. Install the Vault Injector into k8s:
+
+Disconnect from your AWS SSM session (don't run this in the Vault ASG instance):
+
+```sh
+cat > $HOME/sa-ssp-aws/inputs/vault-values.yaml << EOF
+injector:
+  enabled: true
+  externalVaultAddr: "https://${VAULT_ADDR}:8200"
+EOF
+```
+
+```sh
+helm repo add hashicorp https://helm.releases.hashicorp.com && helm repo update
+#helm install vault -f ./vault-values.yaml hashicorp/vault --version "0.20.0"
+helm install vault -f $HOME/sa-ssp-aws/inputs/vault-values.yaml hashicorp/vault
+```
+
 ### n. Enable k8s Auth
 
 ```sh
 vault auth enable kubernetes
 ```
 
-**NOTE:** on your local machine! 
-//TODO: move all this (The platform section) to a bastian host in platsvcs vpc
+**NOTE** The Vault Injector Agent needs to be installed before these commands will work. If the Vault Injector Agent installed failed you will see:
+
+```sh
+Error from server (NotFound): serviceaccounts "vault" not found
+```
 
 
 ```sh
@@ -325,32 +371,12 @@ pem_keys                  []
 ```
 
 
-**NEXT** Create Policies:
+
+
+**YOU ARE UP TO HERE: NEXT** Create Policies:
 https://developer.hashicorp.com/consul/tutorials/vault-secure/kubernetes-vault-consul-secrets-management#generate-vault-policies
 
 
-
-
-
-
-### n. Install the Vault Injector into k8s:
-
-Disconnect from your AWS SSM session (don't run this in the Vault ASG instance):
-
-```sh
-export VAULT_PRIVATE_ADDR=`terraform output -raw vault_lb_dns_name`
-cat > vault-values.yaml << EOF
-injector:
-  enabled: true
-  externalVaultAddr: "https://${VAULT_PRIVATE_ADDR}:8200"
-EOF
-```
-
-```sh
-helm repo add hashicorp https://helm.releases.hashicorp.com && helm repo update
-#helm install vault -f ./vault-values.yaml hashicorp/vault --version "0.20.0"
-helm install vault -f ./vault-values.yaml hashicorp/vault
-```
 
 
 ### Secure Communications - CONSUL
