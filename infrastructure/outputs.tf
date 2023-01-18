@@ -26,9 +26,12 @@ output "app_eks_cluster" {
   value = module.eks.cluster_id
 }
 
-
 output "bastian_platsvcs" {
   value = "ssh -o 'IdentitiesOnly yes' -i '../inputs/bastian-key.pem' ubuntu@${aws_instance.bastian_platsvcs.public_dns}"
+}
+
+output "bastian_platsvcs_copy_licenses" {
+  value = "scp -o 'IdentitiesOnly yes' -i '../inputs/bastian-key.pem' ../inputs/*.hclic ubuntu@${aws_instance.bastian_platsvcs.public_dns}:/home/ubuntu/sa-ssp-aws/inputs/"
 }
 
 
