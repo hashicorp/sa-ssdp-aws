@@ -21,6 +21,7 @@ data "template_file" "aws_bastian_init" {
     consul_version = var.consul_version
 #    consul_version = "1.12.8"
     vault_version = var.vault_version
+    sa_release_version = var.sa_release_version 
 #    vault_version = "1.12.2"
 #    kubeconfig = local_sensitive_file.kube_config_prod.content
 #    consul_chart_values = local_sensitive_file.consul_helm_chart.content

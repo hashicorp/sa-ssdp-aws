@@ -24,6 +24,14 @@ variable "consul_version" {
   default     = "1.12.8"
 }
 
+
+variable "sa_release_version" {
+  description = "Version of this Solution Architecture"
+  type        = string
+  default     = "0.1.0"
+}
+
+
 ## VPC Environments
 
 variable "env_platform_services" {
