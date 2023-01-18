@@ -35,28 +35,25 @@ terraform apply
 //TODO: Check this before GA, and annonymize
 
 ```sh
-app_eks_cluster = "app_svcs-eks"
-vpc_app_microservices_id = "vpc-09d3a9fe742e5b7cc"
-vpc_payments = "vpc-07811002745250cba"
-vpc_platform_services_id = "vpc-0a87f14b17dc9b95f"
+bastian_platsvcs = "ssh -o 'IdentitiesOnly yes' -i '../inputs/bastian-key.pem' ubuntu@ec2-54-189-161-81.us-west-2.compute.amazonaws.com"
+bastian_platsvcs_copy_licenses = "scp -o 'IdentitiesOnly yes' -i '../inputs/bastian-key.pem' ../inputs/* ubuntu@ec2-54-189-161-81.us-west-2.compute.amazonaws.com:/home/ubuntu/sa-ssp-aws/inputs/"
+vpc_app_microservices_id = "vpc-0a7be785bdb291c45"
+vpc_payments = "vpc-05012a4b83dbc80b0"
+vpc_platform_services_id = "vpc-053b252716a672bc5"
 vpc_platform_services_public_subnets = [
-  "subnet-0796fe75989b746d8",
-  "subnet-0b9a6b0dc28543d6f",
-  "subnet-08f5ea71124639af9",
+  "subnet-071c6ecca31b3a4f7",
+  "subnet-0ae1cfda61683bf6c",
+  "subnet-016b8e5cec0d7ddeb",
 ]
 your_ip_addr = "157.131.55.230"
 ```
 
-Using the Terraform output information, create a new `sa-ssp-aws/platform/terraform.tfvars` file by copying the  `sa-ssp-aws/platform/terraform.tfvars.example` file.
+Using the Terraform output `bastian_platsvcs_copy_licenses` string, copy the vault and consul enterprise license to the bastian host, e.g.:
 
+```sh
+scp -o 'IdentitiesOnly yes' -i '../inputs/bastian-key.pem' ../inputs/* ubuntu@ec2-54-189-161-81.us-west-2.compute.amazonaws.com:/home/ubuntu/sa-ssp-aws/inputs/
+```
 
-**//URGENT**
-
-//FIXME: I *think* we should switch to the Bastian host from here... Or should we work out how to run local commands and 'push' the output to the ASG? 
-
-*TESTING THIS NOW!*
-
-**//URGENT**
 
 ### 3. Connect to the Bastian Host
 
@@ -69,6 +66,13 @@ Using the credentials provided in the terraform output, connect to the bastian h
 ssh -o 'IdentitiesOnly yes' -i '../inputs/bastian-key.pem' ubuntu@ec2-35-91-0-182.us-west-2.compute.amazonaws.com
 ```
 
+Export your AWS Credentials so that you can communicate with AWS resources:
+
+```sh
+export AWS_ACCESS_KEY_ID=<aws_access_key_id>
+export AWS_SECRET_ACCESS_KEY=<aws_secret_access_key>
+```
+
 ### 4. Create kubeconfig file
 
 To access your EKS cluster you will use the aws cli tool to retrieve your kubeconfig:
@@ -77,11 +81,18 @@ To access your EKS cluster you will use the aws cli tool to retrieve your kubeco
 aws eks update-kubeconfig --region us-west-2 --name app_svcs-eks
 ```
 
+You should see:
+```sh
+Added new context arn:aws:eks:us-west-2:491229875064:cluster/app_svcs-eks to /home/ubuntu/.kube/config
+```
+
 Verify communications with:
 ```sh
 kubectl cluster-info
 kubectl get svc
 ```
+
+You are now ready to deploy and configure the Secure Services Platform. Proceed to [./docs/PLATFORM.md](./docs/PLATFORM.md)
 
 ---
 
@@ -172,6 +183,18 @@ cd sa-ssp-aws
 
 Verify you have the required binaries install (listed in the REQUIREMENTS section above).
 
+Install the consul-enterprise and vault enterprise binaries:
+
+```sh
+#add the hashicorp package repo
+curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
+sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
+
+#install hashicorp packages
+sudo apt update -y
+sudo apt install consul-enterprise=1.12.8+ent* vault-enterprise=1.12.2+ent* terraform=1.3.* -y
+```
+
 ### 3. Prepare the Platform Service deployment
 
 Using the information collected in [1. Collect the required infrastructure values](#1.-Collect-the-required-infrastructure-values) above from the aws cli commands, create a new `sa-ssp-aws/platform/vault-ent-aws/terraform.tfvars` file and enter the appropriate value.
@@ -202,3 +225,4 @@ Repeat for Consul:
 ```sh
 vi ../../inputs/consul.hclic
 ```
+
