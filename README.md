@@ -75,7 +75,6 @@ If you have an existing environment, or wish to build your own VPCs and EKS clus
 * `git`
 * `aws cli` - v2
 * `session-manager-plugin` - v1.2 https://formulae.brew.sh/cask/session-manager-plugin
-* `consul` - v1.12 locally installed
 * `terraform` - v1.3 locally installed
 
 **NOTE:** The AWS `session-manager-plugin` is used to remote shell into the Vault and Consul AWS Auto Scale Group (ASG) instances. 
@@ -107,14 +106,6 @@ ls -l1 ./sa-ssp-aws/inputs
 README.md
 consul.hclic
 vault.hclic
-```
-
-#### 4. Create a Consul Gossip Key
-
-Create a Consul Gossip Key using a locally install consul binary (see Requirements section above) with the command below. Save this for storage as a Vault Secret in later steps.
-
-```sh
-consul keygen
 ```
 
 ---
