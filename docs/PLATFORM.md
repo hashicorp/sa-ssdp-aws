@@ -1,10 +1,10 @@
-## PLATFORM
+# PLATFORM
 
 NOTE: the working directory for this sectin is: `sa-ssp-aws/platform/`
 
 In this section you will deploy two Auto Scale Groups (ASGs) of five EC2 servers each: 1 Vault ASG, 1 Consul ASG.
 
-### Secrets Management - VAULT
+## Secrets Management - VAULT
 
 ### 1. Prepare for terraform deployment
 
@@ -58,7 +58,10 @@ echo "export VAULT_ADDR=https://$(terraform output -raw vault_lb_dns_name):8200"
 source ~/.bashrc
 ```
 
-Verify with `vault status`
+Verify vault communication with:
+```sh
+vault status
+```
 
 **NOTE:** Vault is currently: `Sealed: true`
 
@@ -166,6 +169,15 @@ Last WAL                 27
 **NOTE:** Repeat this to unseal each Vault instance in the scale group //FIXME: but do I do this?
 
 
+Vault does not enable dead server cleanup by default. Read more here: https://developer.hashicorp.com/vault/docs/concepts/integrated-storage/autopilot?_ga=2.183861359.832577255.1671558082-1844922285.1658445952#dead-server-cleanup
+
+```sh
+vault operator raft autopilot set-config \
+    -cleanup-dead-servers=true \
+    -dead-server-last-contact-threshold=10 \
+    -min-quorum=3
+```
+
 ### 3. Configure Vault for Consul Gossip Key
 
 ### n. Enable Vault Secrets Engine
@@ -206,7 +218,7 @@ vault kv get consul/secret/enterpriselicense
 Store Consul Gossip Key in Vault - substituting the Consul Gossip Key generated earlier:
 
 ```sh
-vault kv put consul/secret/gossip gossip="$(consul keygen)"
+vault kv put consul/secret/gossip key="$(consul keygen)"
 ```
 
 The respose should resemble:
@@ -225,11 +237,12 @@ destroyed          false
 version            1
 ```
 
+
 OPTIONAL: Verify with:
+
 ```sh
 vault kv get consul/secret/gossip
 ```
-
 
 ### n. Configure Vault for Consul mTLS Cert Management
 
@@ -287,14 +300,25 @@ Disconnect from your AWS SSM session (don't run this in the Vault ASG instance):
 cat > $HOME/sa-ssp-aws/inputs/vault-values.yaml << EOF
 injector:
   enabled: true
-  externalVaultAddr: "https://${VAULT_ADDR}:8200"
+  externalVaultAddr: "${VAULT_ADDR}"
 EOF
 ```
 
 ```sh
 helm repo add hashicorp https://helm.releases.hashicorp.com && helm repo update
 #helm install vault -f ./vault-values.yaml hashicorp/vault --version "0.20.0"
-helm install vault -f $HOME/sa-ssp-aws/inputs/vault-values.yaml hashicorp/vault
+helm install vault -f $HOME/sa-ssp-aws/inputs/vault-values.yaml hashicorp/vault 
+```
+//TODO: pin this to avoid hashicorps breaking changes
+
+**NOTE:** If you get the following error, you likely missed the `update-kubeconfig` command in the 'Infrastructure' section:
+```sh
+Error: Kubernetes cluster unreachable: Get "http://localhost:8080/version?timeout=32s": dial tcp 127.0.0.1:8080: connect: connection refused
+```
+
+To remedy, execute:
+```sh
+aws eks update-kubeconfig --region us-west-2 --name app_svcs-eks
 ```
 
 ### n. Enable k8s Auth
@@ -372,11 +396,57 @@ pem_keys                  []
 
 
 
-
 **YOU ARE UP TO HERE: NEXT** Create Policies:
 https://developer.hashicorp.com/consul/tutorials/vault-secure/kubernetes-vault-consul-secrets-management#generate-vault-policies
 
 
 
 
-### Secure Communications - CONSUL
+## Secure Communications - CONSUL
+
+
+### 1. Create Consul Auto-Scale Group
+
+```sh
+cd $HOME/sa-ssp-aws/platform/consul-ent-aws
+```
+
+```sh
+cp $HOME/sa-ssp-aws/inputs/terraform.tfvars-platform $HOME/sa-ssp-aws/platform/consul-ent-aws/terraform.tfvars
+```
+
+```sh
+terraform init
+terraform plan
+terraform apply
+```
+
+
+### 2. Verify Consul Scale Group (OPTIONAL)
+
+Using the AWS 'Secure Session Manager' (`aws ssm`) command, connect to a Consul instance and verify the Consul Cluster is running and healthy.
+
+Using the AWS Auto Scaling Group (ASG) name in the above terraform output, get the `instance id` of an EC2 Scale Group member:
+
+```sh
+aws autoscaling describe-auto-scaling-groups --auto-scaling-group-names `terraform output -raw asg_name` --no-cli-pager --query "AutoScalingGroups[*].Instances[*].InstanceId"
+```
+
+Select an instance ID from the list and execute:
+
+```sh
+aws ssm start-session --target <instance_id>
+```
+
+To interact with Vault within a Vault cluster instance shell session you must export the following two variables:
+```sh
+export VAULT_ADDR="https://127.0.0.1:8200"
+export VAULT_CACERT="/opt/vault/tls/vault-ca.pem"
+```
+
+Verify Vault is running with:
+```sh
+vault status
+```
+
+Exit the shell session with the Vault cluster instance before continuing.

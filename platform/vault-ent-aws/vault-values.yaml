@@ -1,3 +1,0 @@
-injector:
-  enabled: true
-  externalVaultAddr: "https://internal-sa-vault-lb-466815054.us-west-2.elb.amazonaws.com:8200"

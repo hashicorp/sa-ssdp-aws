@@ -100,6 +100,7 @@ resource "aws_security_group_rule" "vault_network_lb_ingress" {
   cidr_blocks       = var.allowed_inbound_cidrs
 }
 
+## Required for AWS SSM sessions
 resource "aws_security_group_rule" "vault_ssh_inbound" {
   count             = var.allowed_inbound_cidrs_ssh != null ? 1 : 0
   description       = "Allow specified CIDRs SSH access to Vault nodes"

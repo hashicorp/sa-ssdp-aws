@@ -1,64 +1,57 @@
-# Vault Enterprise AWS
+# module aim
 
-module "servers" {
-  source = "./accelerator-aws-consul/modules/immutable-aws-consul"
+data "aws_region" "current" {}
 
-  # Instance Configuration
-  ami_id              = "ami-0123456789abcdef0"
-#  ami_id              =   data.aws_ami.ubuntu.id
-  instance_type       = "m5.large"
-#  key_name            = "user-key" # SSH key pair registered in AWS
-#  key_name            =   module.key_pair.key_pair_key_name
-  key_name            =   var.key_name
-#  vpc_id              = "vpc-0270bfc41c9fc9aab"
-  vpc_id              = var.vpc_id
-#  instance_subnets    = ["subnet-aaaaaaaa", "subnet-bbbbbbbb", "subnet-cccccccc"] # Generally private (NAT) subnets
-#  instance_subnets    = ["subnet-03892e82c90c63f9b", "subnet-039d54a3c5a188135", "subnet-03eaa80c2e9553a2c"]
-  instance_subnets    = var.instance_subnets
-  associate_public_ip = false
-  attach_ssm_policy   = true
+module "iam" {
+  source = "./modules/iam"
 
-  # Cluster Details
-  consul_cluster_version = "0.0.1"
-  consul_nodes           = 5
-  environment_name       = "primary" # Used for auto-join tagging
-  tag_owner              = "someone@hashicorp.com"
+  resource_name_prefix         = var.resource_name_prefix
 
-  disk_params = {
-    root = {
-      volume_type = "gp3"
-      volume_size = 32
-      iops        = 3000
-    },
-    data = {
-      volume_type = "gp3"
-      volume_size = 100
-      iops        = 3000
-    }
-  }
-
-  consul_secrets = {
-#    secrets_manager_arn = "arn:aws:secretsmanager:us-east-2:012345678901:secret:consul/server-config-abcdef"
-    secrets_manager_arn = aws_secretsmanager_secret.consul_secrets.arn
-#    kms_key_arn         = "arn:aws:kms:us-east-2:012345678901:key/00a00000-aa00-00aa-aa0a-00a00aaa000a"
-    kms_key_arn         = aws_kms_key.consul_key.arn
-  }
-
-  consul_agent = {
-    container_image    = "hashicorp/consul-enterprise:1.12.1-ent"
-    server             = true
-    datacenter         = "dc1"
-    primary_datacenter = "dc1"
-    ca_cert            = file("${path.module}/consul-agent-ca.pem")
-    agent_cert         = file("${path.module}/dc1-server-consul.pem")
-    join_environment   = "primary" # See environment_name above
-    ui                 = true
-  }
-
-#  snapshot_agent = {
-#    enabled      = true
-#    interval     = "15m"
-#    retention    = 10
-#    s3_bucket_id = aws_s3_bucket.snapshots.id
-#  }
 }
+
+# module user_data
+
+module "user_data" {
+  source = "./modules/user_data"
+
+#  aws_bucket_vault_license    = module.object_storage.s3_bucket_vault_license
+  # Get the license from Vault 
+#  aws_region                  = data.aws_region.current.name
+  aws_region                  = var.region
+  node_count                = var.node_count
+#  kms_key_arn                 = module.kms.kms_key_arn
+#  leader_tls_servername       = module.aws_secrets.leader_tls_servername
+  resource_name_prefix        = var.resource_name_prefix
+#  secrets_manager_arn         = module.aws_secrets.secrets_manager_arn
+#  user_supplied_userdata_path = var.user_supplied_userdata_path
+  consul_license_secret_path  = var.consul_license_secret_path
+  consul_version              = var.consul_version
+  vault_version              = var.vault_version
+  vault_token                 = var.vault_token
+  vault_addr                  = var.vault_addr
+  vault_ca                  = var.vault_ca
+}
+
+# module vm
+
+
+module "vm" {
+  source = "./modules/vm"
+
+  allowed_inbound_cidrs     = var.allowed_inbound_cidrs_lb
+  allowed_inbound_cidrs_ssh = var.allowed_inbound_cidrs_ssh
+  aws_iam_instance_profile  = module.iam.aws_iam_instance_profile
+# common_tags               = var.common_tags
+  instance_type             = var.instance_type
+#  key_name                  = var.key_name
+#  lb_type                   = var.lb_type
+  node_count                = var.node_count
+  resource_name_prefix      = var.resource_name_prefix
+  userdata_script           = module.user_data.consul_userdata_base64_encoded
+#  user_supplied_ami_id      = var.user_supplied_ami_id
+ # vault_lb_sg_id            = module.loadbalancer.vault_lb_sg_id
+  consul_subnets             = var.private_subnet_ids
+ # vault_target_group_arns   = local.vault_target_group_arns
+  vpc_id                    = var.vpc_id
+}
+

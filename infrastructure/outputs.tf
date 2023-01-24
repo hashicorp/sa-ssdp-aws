@@ -31,24 +31,11 @@ output "bastian_platsvcs" {
 }
 
 output "bastian_platsvcs_copy_licenses" {
-  value = "scp -o 'IdentitiesOnly yes' -i '../inputs/bastian-key.pem' ../inputs/*.hclic ubuntu@${aws_instance.bastian_platsvcs.public_dns}:/home/ubuntu/sa-ssp-aws/inputs/"
+  value = "scp -o 'IdentitiesOnly yes' -i '../inputs/bastian-key.pem' ../inputs/* ubuntu@${aws_instance.bastian_platsvcs.public_dns}:/home/ubuntu/sa-ssp-aws/inputs/"
 }
 
 
-#output "bastian_app_vpc" {
-#  value = "ssh -o 'IdentitiesOnly yes' -i '../keys/app_vpc.pem' ubuntu@${aws_instance.bastian.public_dns}"
-#}
 
-
-#output "hcp_consul_public_endpoint_url" {
-#  value = "${hcp_consul_cluster.hcp_consul.consul_public_endpoint_url}"
-#}
-#
-#output "hcp_consul_acl_token_secret_id" {
-#  value = hcp_consul_cluster_root_token.token.secret_id
-#  sensitive = true
-#}
-#
 #output "vault_cluster_host" {
 #  value = hcp_vault_cluster.hcp_vault.vault_public_endpoint_url
 #}

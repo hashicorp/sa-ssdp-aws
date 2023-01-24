@@ -1,40 +1,81 @@
-variable "AWS_ACCESS_KEY_ID" {
-  type = string
-  default = ""
-}
-
-variable "AWS_SECRET_ACCESS_KEY" {
-  type = string
-  default = ""
-}
-
 variable "region" {
   description = "Default AWS Region to deploy in."
   type        = string
   default     = "us-west-2"
 }
 
+variable "consul_license_secret_path" {
+  type        = string
+  description = "Name of Vault Secret storing Consul license file"
+  default     = "consul/secret/enterpriselicense"
+}
+
+variable "consul_version" {
+  type        = string
+  default     = "1.12.8"
+  description = "Consul version"
+}
+
+variable "vault_version" {
+  type        = string
+  default     = "1.12.2"
+  description = "Vault version"
+}
+
+variable "vault_ca" {
+  type        = string
+  default     = null
+  description = "Vault CA"
+}
+
+variable "vault_token" {
+  type        = string
+  default     = null
+  description = "Vault token"
+}
+
+variable "vault_addr" {
+  type        = string
+  default     = null
+  description = "Vault Cluster Address"
+}
+
+variable "resource_name_prefix" {
+  type        = string
+  description = "Resource name prefix used for tagging and naming AWS resources"
+  default     = "sa"
+}
+
 variable "vpc_id" {
-  type    = string
-  default = ""
+  type        = string
+  description = "VPC ID where Vault will be deployed"
 }
 
-variable "env_name" {
-  type    = string
-  default = ""  
+variable "private_subnet_ids" {
+  type        = list(string)
+  description = "Subnet IDs to deploy Consul into"
 }
 
-variable "eks_cluster_name" {
-  type    = string
-  default = ""
+variable "allowed_inbound_cidrs_lb" {
+  type        = list(string)
+  description = "(Optional) List of CIDR blocks to permit inbound traffic from to load balancer"
+  default     = null
 }
 
-variable "key_name" {
-  type    = string
-  default = ""
+variable "allowed_inbound_cidrs_ssh" {
+  type        = list(string)
+  description = "(Optional) List of CIDR blocks to permit for SSH to Consul nodes"
+  default     = null
 }
 
-variable "instance_subnets" {
-  type    = list
-  default = []
+variable "node_count" {
+  type        = number
+  default     = 5
+  description = "Number of Vault nodes to deploy in ASG"
+}
+
+variable "instance_type" {
+  type        = string
+  default     = "m5.xlarge"
+  description = "EC2 instance type"
 }

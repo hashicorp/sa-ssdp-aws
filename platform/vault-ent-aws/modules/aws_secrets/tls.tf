@@ -32,9 +32,9 @@ resource "tls_private_key" "server" {
   algorithm = "RSA"
   rsa_bits  = 2048
 
-  #  provisioner "local-exec" {
-  #    command = "echo '${tls_private_key.server.private_key_pem}' > ./vault-key.pem"
-  #  }
+  provisioner "local-exec" {
+    command = "echo '${tls_private_key.server.private_key_pem}' > ../../inputs/vault-key.pem"
+  }
 }
 
 resource "tls_cert_request" "server" {
