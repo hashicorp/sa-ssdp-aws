@@ -141,3 +141,27 @@ data "aws_iam_policy_document" "s3_bucket_vault_license" {
     ]
   }
 }
+
+resource "aws_iam_role_policy" "vault_agent_auto_auth" {
+  count  = var.user_supplied_iam_role_name != null ? 0 : 1
+  name   = "${var.resource_name_prefix}-vault-auth-auth"
+  role   = aws_iam_role.instance_role[0].id
+  policy = data.aws_iam_policy_document.vault_agent_auto_auth.json
+}
+
+data "aws_iam_policy_document" "vault_agent_auto_auth" {
+  statement {
+    effect = "Allow"
+
+    actions = [
+      "ec2:DescribeInstances",
+      "iam:GetInstanceProfile*",
+      "iam:GetRole"
+    ]
+
+    resources = [
+      var.vault_agent_auto_auth_arn, //FIXME: https://github.com/hashicorp/field-workshops-consul/blob/a8b48adb7f13bec9b0603badd2478a1cffdb72e9/instruqt-tracks/multi-cloud-service-networking-with-consul/assets/terraform/vault/aws.tf#L141
+      "${var.vault_agent_auto_auth_arn}/*",
+    ]
+  }
+}
