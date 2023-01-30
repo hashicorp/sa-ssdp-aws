@@ -13,6 +13,10 @@ output "kms_key_arn" {
   value = module.kms.kms_key_arn
 }
 
+output "aws_vault_iam_role_arn" {
+  value = module.iam.aws_vault_iam_role_arn
+}
+
 output "launch_template_id" {
   value = module.vm.launch_template_id
 }
