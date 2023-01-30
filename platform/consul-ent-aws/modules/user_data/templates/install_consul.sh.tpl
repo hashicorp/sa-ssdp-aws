@@ -21,24 +21,78 @@ timedatectl set-timezone UTC
 # removing any default installation files from /opt/vault/tls/
 rm -rf /opt/vault/tls/*
 
+
 # /opt/vault/tls should be readable by all users of the system
 chmod 0755 /opt/vault/tls
 
-# vault-key.pem should be readable by the vault group only
-#touch /opt/vault/tls/vault-key.pem
-#touch /opt/vault/tls/vault-ca.pem
-#chown root:vault /opt/vault/tls/vault-key.pem
-#chmod 0640 /opt/vault/tls/vault-key.pem
-
-
 echo ${vault_ca} > /opt/vault/tls/vault-ca.pem
 
+# //TODO: Remove for GA!
 echo "export VAULT_TOKEN=${vault_token}" >> /home/ubuntu/.bashrc
 echo "export VAULT_ADDR=${vault_addr}" >> /home/ubuntu/.bashrc
 echo "export VAULT_CACERT=/opt/vault/tls/vault-ca.pem" >> /home/ubuntu/.bashrc
 
 
+# removing any default installation files from /etc/vault.d/
+rm -rf /etc/vault.d/*
+
+# remove Vault Server SystemD unit
+rm /etc/systemd/system/vault.service
+
 ## //TODO: create vault agent config file...
+# Create Vault agent config file
+cat << EOF /etc/vault.d/vault.hcl
+
+exit_after_auth = true
+pid_file = "./pidfile"
+
+auto_auth {
+    method "aws" {
+        mount_path = "auth/aws"
+        config = {
+            type = "iam"
+            role = "dev-role-iam"
+        }
+    }
+
+    sink "file" {
+        wrap_ttl = "5m"
+        config = {
+            path = "/home/ubuntu/vault-token-via-agent"
+        }
+    }
+}
+
+vault {
+  address = "${vault_addr}"
+}
+EOF
+
+
+cat << EOF /etc/systemd/system/vault-agent.service
+[Unit]
+Description=Nomad Agent
+Requires=consul-online.target
+After=consul-online.target
+
+[Service]
+KillMode=process
+KillSignal=SIGINT
+Environment=VAULT_ADDR=http://active.vault.service.consul:8200
+Environment=VAULT_SKIP_VERIFY=true
+ExecStartPre=/usr/local/bin/vault agent -config /etc/vault-agent.d/vault-agent.hcl
+ExecStart=/usr/bin/nomad-vault.sh
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=on-failure
+RestartSec=2
+StartLimitBurst=3
+StartLimitIntervalSec=10
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
 
 
 ################
