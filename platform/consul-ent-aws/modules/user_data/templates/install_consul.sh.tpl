@@ -25,7 +25,7 @@ rm -rf /opt/vault/tls/*
 # /opt/vault/tls should be readable by all users of the system
 chmod 0755 /opt/vault/tls
 
-echo ${vault_ca} > /opt/vault/tls/vault-ca.pem
+echo "${vault_ca}" > /opt/vault/tls/vault-ca.pem
 
 # //TODO: Remove for GA!
 echo "export VAULT_TOKEN=${vault_token}" >> /home/ubuntu/.bashrc
