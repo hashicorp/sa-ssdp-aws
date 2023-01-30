@@ -115,7 +115,7 @@ client_addr         = "0.0.0.0"
 log_level           = "INFO"
 ui                  = true
 # AWS cloud join
-retry_join          = ["provider=aws tag_key=Environment-Name tag_value=${environment_name}"]
+retry_join          = ["provider=aws tag_key=${name}-consul tag_value=server"]
 # Max connections for the HTTP API
 limits {
   http_max_conns_per_client = 128
