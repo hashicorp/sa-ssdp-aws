@@ -1,9 +1,11 @@
-#vpc_cidr_block = "10.0.0.0/16"
-region = "us-west-2"
+region                    = "us-west-2"
 
-allowed_inbound_cidrs_lb = ["10.0.0.0/16"]
-vault_license_filepath = "../../inputs/vault.hclic"
+allowed_inbound_cidrs_lb  = ["10.0.0.0/16"]
+vault_license_filepath    = "../../inputs/vault.hclic"
 
 private_subnet_ids      = ["subnet-0378c1d7091510d6f","subnet-070ba21940761bae0","subnet-029bca70aabeeb041"]
 vpc_id                  = "vpc-0eae9dd8a08b86029"
 key_name                = "bastian-key"
+
+instance_type           = "m5.large"    #default = m5.xlarge
+node_count              = 3             #default = 5
