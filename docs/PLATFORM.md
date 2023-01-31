@@ -8,6 +8,12 @@ In this section you will deploy two Auto Scale Groups (ASGs) of five EC2 servers
 
 ### 1. Prepare for terraform deployment
 
+Grab your EKS kubeconfig for vault auth:
+
+```sh
+aws eks update-kubeconfig --region us-west-2 --name app_svcs-eks
+```
+
 With your AWS credentials exported, and the correct information added to your `$HOME/sa-ssp-aws/platform/vault-ent-aws/terraform.tfvars` from the steps above, you should now be able to run:
 
 //TODO: ensure only the required information is added to the `sa-ssp-aws/inputs/terraform.tf-platform`
@@ -83,6 +89,7 @@ aws ssm start-session --target <instance_id>
 ```
 
 To interact with Vault within a Vault cluster instance shell session you must export the following two variables:
+
 ```sh
 export VAULT_ADDR="https://127.0.0.1:8200"
 export VAULT_CACERT="/opt/vault/tls/vault-ca.pem"
@@ -97,10 +104,9 @@ Exit the shell session with the Vault cluster instance before continuing.
 
 ### 3. Initialize Vault Cluster
 
-//TODO: Do I need to unseal every instance?
-
 ```sh
-vault operator init
+# vault operator init # **STOP** try this: 
+vault operator init -recovery-shares=1 -recovery-threshold=1 -format=json | jq . > ./aws_vault_keys.json
 ```
 
 **NOTE** Copy the `Recovery Keys` and the `Initial Root Token` somewhere safe for future steps.
@@ -108,7 +114,9 @@ vault operator init
 Export the Vault Token to provide appropriate permissions for following commands:
 
 ```sh
-export VAULT_TOKEN=<initial_root_token>
+#export VAULT_TOKEN=<initial_root_token>
+echo "export VAULT_TOKEN=$(cat ./aws_vault_keys.json | jq -r .root_token)" >> ~/.bashrc
+source ~/.bashrc
 ```
 
 Verify token permissions with the following:
@@ -128,45 +136,7 @@ i-0560234cb583fb773    10.0.103.35:8201     follower    true
 i-0a403b210f7af110a    10.0.102.179:8201    follower    true
 ```
 
-Unseal Vault:
-```sh
-vault operator unseal
-```
-
-You will be presented with the following prompt:
-
-```sh
-Unseal Key (will be hidden):
-```
-
-Enter the value of `Recovery Key 1:` retrieved from the `vault operator init` command above.
-
-You should see an output as such:
-```sh
-Key                      Value
----                      -----
-Recovery Seal Type       shamir
-Initialized              true
-Sealed                   false
-Total Recovery Shares    5
-Threshold                3
-Version                  1.12.2+ent
-Build Date               2022-11-23T21:33:30Z
-Storage Type             raft
-Cluster Name             vault-cluster-8a6b623b
-Cluster ID               1e4d4bf9-7dce-44ff-126e-0526f3455157
-HA Enabled               true
-HA Cluster               https://10.0.101.40:8201
-HA Mode                  active
-Active Since             2023-01-11T18:07:07.686021267Z
-Raft Committed Index     137
-Raft Applied Index       137
-Last WAL                 27
-```
-
-**NOTE:** Vault is now: `Sealed: false` and ready for use.
-
-**NOTE:** Repeat this to unseal each Vault instance in the scale group //FIXME: but do I do this?
+NOTE: We are using the auto-unseal capability via AWS KMS, so we do not need to run execute the unseal command: `vault operator unseal`. The cluster will unseal itself - keep running `vault status` until you see `Sealed false` in the output.
 
 
 Vault does not enable dead server cleanup by default. Read more here: https://developer.hashicorp.com/vault/docs/concepts/integrated-storage/autopilot?_ga=2.183861359.832577255.1671558082-1844922285.1658445952#dead-server-cleanup
@@ -319,6 +289,23 @@ Error: Kubernetes cluster unreachable: Get "http://localhost:8080/version?timeou
 To remedy, execute:
 ```sh
 aws eks update-kubeconfig --region us-west-2 --name app_svcs-eks
+```
+
+
+### n. Enable AWS Auth
+
+To use IAM for Vault Agent Auth:
+
+```sh
+vault auth enable aws
+# vault write -force auth/aws/config/client  #TODO: this was in the docs????
+
+# AWS_VAULT_IAM_ROLE_ARN=$(terraform output -state /root/terraform/vault/terraform.tfstate aws_vault_iam_role_arn)
+AWS_VAULT_IAM_ROLE_ARN=$(terraform output aws_vault_iam_role_arn)
+vault write auth/aws/role/vault \
+  auth_type=iam \
+  bound_iam_principal_arn="${AWS_VAULT_IAM_ROLE_ARN}" \
+  policies=vault,consul ttl=30m
 ```
 
 ### n. Enable k8s Auth

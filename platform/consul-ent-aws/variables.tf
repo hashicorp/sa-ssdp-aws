@@ -40,6 +40,12 @@ variable "vault_addr" {
   description = "Vault Cluster Address"
 }
 
+variable "aws_vault_iam_role_arn" {
+  type        = string
+  default     = null
+  description = "IAM Role ARN, for AWS Auto-Auth"
+}
+
 variable "resource_name_prefix" {
   type        = string
   description = "Resource name prefix used for tagging and naming AWS resources"

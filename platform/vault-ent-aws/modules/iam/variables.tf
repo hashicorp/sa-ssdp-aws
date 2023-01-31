@@ -36,10 +36,10 @@ variable "secrets_manager_arn" {
   description = "Secrets manager ARN where TLS cert info is stored"
 }
 
-variable "vault_agent_auto_auth_arn" {
-  type        = string
-  description = "Vault agent auto_auth"
-}
+#variable "vault_agent_auto_auth_arn" {
+#  type        = string
+#  description = "Vault agent auto_auth"
+#}
 
 variable "aws_vault_iam_role_arn" {
   type        = string

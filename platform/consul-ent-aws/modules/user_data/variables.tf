@@ -78,3 +78,9 @@ variable "vault_addr" {
   default     = null
   description = "Vault Cluster Address"
 }
+
+#variable "aws_vault_iam_role_arn" {
+#  type        = string
+#  default     = null
+#  description = "IAM Role ARN, for AWS Auto-Auth"
+#}

@@ -23,6 +23,7 @@ locals {
       vault_ca     = file("${path.module}/${var.vault_ca}") # From Vault Module output.
       vault_addr   = var.vault_addr
       vault_token  = var.vault_token
+#      aws_vault_iam_role_arn = var.aws_vault_iam_role_arn
 #      leader_tls_servername   = var.leader_tls_servername
     }
   )
