@@ -35,7 +35,6 @@ module "user_data" {
 
 # module vm
 
-
 module "vm" {
   source = "./modules/vm"
 
