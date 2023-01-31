@@ -32,8 +32,8 @@ resource "aws_security_group" "consul" {
   )
 }
 
-resource "aws_security_group_rule" "consul_rpc" {
-  description       = "Allow Consul nodes to reach other on port 8500 for API"
+resource "aws_security_group_rule" "consul_internal_rpc" {
+  description       = "Allow Consul nodes to reach other on port 8300 for API"
   security_group_id = aws_security_group.consul.id
   type              = "ingress"
   from_port         = 8300
@@ -42,7 +42,7 @@ resource "aws_security_group_rule" "consul_rpc" {
   self              = true
 }
 
-resource "aws_security_group_rule" "consul_lan_serf_tcp" {
+resource "aws_security_group_rule" "consul_internal_lan_serf_tcp" {
   description       = "Allow Consul nodes to communicate on port 8301 & 8302 for replication traffic, request forwarding, and Raft gossip"
   security_group_id = aws_security_group.consul.id
   type              = "ingress"
@@ -52,7 +52,7 @@ resource "aws_security_group_rule" "consul_lan_serf_tcp" {
   self              = true
 }
 
-resource "aws_security_group_rule" "consul_lan_serf_udp" {
+resource "aws_security_group_rule" "consul_internal_lan_serf_udp" {
   description       = "Allow Consul nodes to communicate on port 8201 for replication traffic, request forwarding, and Raft gossip"
   security_group_id = aws_security_group.consul.id
   type              = "ingress"
@@ -68,37 +68,50 @@ resource "aws_security_group_rule" "consul_lan_serf_udp" {
 # just the subnets that the load balancer spans
 # (which are the private subnets the Vault instances use)
 
-#data "aws_subnet" "subnet" {
-#  count = length(var.vault_subnets)
-#  id    = var.vault_subnets[count.index]
-#}
-#
-#locals {
-#  subnet_cidr_blocks = [for s in data.aws_subnet.subnet : s.cidr_block]
-#}
-#
-#resource "aws_security_group_rule" "vault_network_lb_inbound" {
-#  count             = var.lb_type == "network" ? 1 : 0
-#  description       = "Allow load balancer to reach Vault nodes on port 8200"
-#  security_group_id = aws_security_group.vault.id
-#  type              = "ingress"
-#  from_port         = 8200
-#  to_port           = 8200
-#  protocol          = "tcp"
-#  cidr_blocks       = local.subnet_cidr_blocks
-#}
-#
-#resource "aws_security_group_rule" "vault_network_lb_ingress" {
-#  count             = var.lb_type == "network" && var.allowed_inbound_cidrs != null ? 1 : 0
-#  description       = "Allow specified CIDRs access to load balancer and nodes on port 8200"
-#  security_group_id = aws_security_group.vault.id
-#  type              = "ingress"
-#  from_port         = 8200
-#  to_port           = 8200
-#  protocol          = "tcp"
-#  cidr_blocks       = var.allowed_inbound_cidrs
-#}
-#
+data "aws_subnet" "subnet" {
+  count = length(var.consul_subnets)
+  id    = var.consul_subnets[count.index]
+}
+
+locals {
+  subnet_cidr_blocks = [for s in data.aws_subnet.subnet : s.cidr_block]
+}
+
+
+## Required for AWS SSM sessions
+resource "aws_security_group_rule" "consul_lan_serf_tcp_inbound" {
+  count             = var.allowed_inbound_cidrs != null ? 1 : 0
+  description       = "Allow specified CIDRs SSH access to Consul nodes"
+  security_group_id = aws_security_group.consul.id
+  type              = "ingress"
+  from_port         = 8301
+  to_port           = 8302
+  protocol          = "tcp"
+  cidr_blocks       = var.allowed_inbound_cidrs
+}
+
+resource "aws_security_group_rule" "consul_lan_serf_udp_inbound" {
+  count             = var.allowed_inbound_cidrs != null ? 1 : 0
+  description       = "Allow specified CIDRs SSH access to Consul nodes"
+  security_group_id = aws_security_group.consul.id
+  type              = "ingress"
+  from_port         = 8301
+  to_port           = 8302
+  protocol          = "udp"
+  cidr_blocks       = var.allowed_inbound_cidrs
+}
+
+resource "aws_security_group_rule" "consul_api_inbound" {
+  count             = var.allowed_inbound_cidrs != null ? 1 : 0
+  description       = "Allow specified CIDRs to Consul HTTP API"
+  security_group_id = aws_security_group.consul.id
+  type              = "ingress"
+  from_port         = 8500
+  to_port           = 8500
+  protocol          = "tcp"
+  cidr_blocks       = var.allowed_inbound_cidrs
+}
+
 
 ## Required for AWS SSM sessions
 resource "aws_security_group_rule" "consul_ssh_inbound" {
