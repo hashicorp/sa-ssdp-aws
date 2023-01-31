@@ -20,7 +20,7 @@ locals {
       consul_license_secret_path      = var.consul_license_secret_path
       gossip_key = "DVgIGdDx5G1JOoCIuZrRXxjXyfVY6yrI/riRPbnTllw="  //TODO: this needs to come from Vault Cluster
       vault_version     = var.vault_version
-      vault_ca     = file("${path.module}/${var.vault_ca}") # From Vault Module output.
+      vault_ca     = file(var.vault_ca) # From Vault Module output.
       vault_addr   = var.vault_addr
       vault_token  = var.vault_token
 #      aws_vault_iam_role_arn = var.aws_vault_iam_role_arn

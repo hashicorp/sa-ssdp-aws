@@ -29,7 +29,7 @@ module "user_data" {
   vault_version              = var.vault_version
   vault_token                 = var.vault_token
   vault_addr                  = var.vault_addr
-  vault_ca                  = "../../${var.vault_ca}"
+  vault_ca                  = var.vault_ca
 #  aws_vault_iam_role_arn    = var.aws_vault_iam_role_arn
 }
 
