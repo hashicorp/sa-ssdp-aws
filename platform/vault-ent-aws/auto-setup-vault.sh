@@ -48,6 +48,14 @@ else
   
   vault secrets enable -path connect-root pki
   
+  # Enable AWS Auth 
+  vault auth enable aws
+
+  AWS_VAULT_IAM_ROLE_ARN=$(terraform output -raw aws_vault_iam_role_arn)
+  vault write auth/aws/role/vault \
+    auth_type=iam \
+    bound_iam_principal_arn=${AWS_VAULT_IAM_ROLE_ARN} \
+    policies=vault,consul ttl=30m
 
   # Enable K8s Auth
   aws eks update-kubeconfig --region us-west-2 --name app_svcs-eks
