@@ -160,8 +160,24 @@ data "aws_iam_policy_document" "vault_agent_auto_auth" {
     ]
 
     resources = [
+      "*",
+    ]
+
+  }
+
+  statement {
+    effect = "Allow"
+
+    actions = [
+      "kms:Encrypt",
+      "kms:Decrypt",
+      "kms:DescribeKey"
+    ]
+
+    resources = [
       var.kms_key_arn, //FIXME: https://github.com/hashicorp/field-workshops-consul/blob/a8b48adb7f13bec9b0603badd2478a1cffdb72e9/instruqt-tracks/multi-cloud-service-networking-with-consul/assets/terraform/vault/aws.tf#L141
       "${var.kms_key_arn}/*",
     ]
+
   }
 }
