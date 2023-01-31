@@ -41,7 +41,9 @@ rm /etc/systemd/system/vault.service
 
 ## //TODO: create vault agent config file...
 # Create Vault agent config file
-cat << EOF /etc/vault.d/vault.hcl
+#  cat > $HOME/sa-ssp-aws/inputs/vault-values.yaml << EOF
+mkdir -p /etc/vault-agent.d/
+cat > /etc/vault-agent.d/vault-agent.hcl << EOF
 
 exit_after_auth = true
 pid_file = "./pidfile"
@@ -65,23 +67,21 @@ auto_auth {
 
 vault {
   address = "${vault_addr}"
+  ca_cert = "/opt/vault/tls/vault-ca.pem"
 }
 EOF
+chown -R vault:vault /etc/vault-agent.d
 
-
-cat << EOF /etc/systemd/system/vault-agent.service
+cat > /etc/systemd/system/vault-agent.service << EOF 
 [Unit]
-Description=Nomad Agent
-Requires=consul-online.target
-After=consul-online.target
+Description=Vault Agent
+Requires=network-online.target
+After=network-online.target
 
 [Service]
 KillMode=process
 KillSignal=SIGINT
-Environment=VAULT_ADDR=http://active.vault.service.consul:8200
-Environment=VAULT_SKIP_VERIFY=true
-ExecStartPre=/usr/local/bin/vault agent -config /etc/vault-agent.d/vault-agent.hcl
-ExecStart=/usr/bin/nomad-vault.sh
+ExecStart=/usr/bin/vault agent -config /etc/vault-agent.d/vault-agent.hcl
 ExecReload=/bin/kill -HUP $MAINPID
 Restart=on-failure
 RestartSec=2
@@ -105,7 +105,7 @@ rm -rf /opt/consul/tls/*
 # /opt/consul/tls should be readable by all users of the system
 chmod 0755 /opt/consul/tls
 
-cat << EOF > /etc/consul.d/consul.hcl.ctmpl
+cat > /etc/consul.d/consul.hcl.ctmpl  << EOF
 datacenter          = "${datacenter}"
 server              = true
 bootstrap_expect    = ${bootstrap_expect}
@@ -145,7 +145,7 @@ mv consul-template /usr/bin/
 rm consul-template_0.30.0_linux_amd64.zip
 mkdir /etc/consul-template.d/
 
-cat << EOF > /etc/consul-template.d/consul-template.hcl
+cat > /etc/consul-template.d/consul-template.hcl << EOF 
 log_level = "warn"
 
 vault {
@@ -173,7 +173,7 @@ template {
 }
 EOF
 
-cat << EOF > /etc/systemd/system/consul-template.service
+cat > /etc/systemd/system/consul-template.service << EOF
 [Unit]
 Description=consul-template
 Requires=network-online.target
@@ -191,4 +191,6 @@ EOF
 
 systemctl enable consul-template.service
 systemctl start consul-template.service
+systemctl enable vault-agent.service
+systemctl start vault-agent.service
 systemctl start consul.service
