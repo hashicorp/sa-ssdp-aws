@@ -53,7 +53,7 @@ auto_auth {
         mount_path = "auth/aws"
         config = {
             type = "iam"
-            role = "dev-role-iam"
+            role = "consul"
         }
     }
 
