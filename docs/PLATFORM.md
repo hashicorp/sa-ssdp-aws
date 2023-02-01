@@ -300,11 +300,10 @@ To use IAM for Vault Agent Auth:
 vault auth enable aws
 # vault write -force auth/aws/config/client  #TODO: this was in the docs????
 
-# AWS_VAULT_IAM_ROLE_ARN=$(terraform output -state /root/terraform/vault/terraform.tfstate aws_vault_iam_role_arn)
-AWS_VAULT_IAM_ROLE_ARN=$(terraform output aws_vault_iam_role_arn)
+AWS_VAULT_IAM_ROLE_ARN=$(terraform output -raw aws_vault_iam_role_arn)
 vault write auth/aws/role/vault \
   auth_type=iam \
-  bound_iam_principal_arn="${AWS_VAULT_IAM_ROLE_ARN}" \
+  bound_iam_principal_arn=${AWS_VAULT_IAM_ROLE_ARN} \
   policies=vault,consul ttl=30m
 ```
 
@@ -437,3 +436,12 @@ vault status
 ```
 
 Exit the shell session with the Vault cluster instance before continuing.
+
+### 3. Create aws auto_auth IAM role
+
+```sh
+AWS_CONSUL_IAM_ROLE_ARN=$(terraform output -raw aws_consul_iam_role_arn)
+vault write auth/aws/role/consul auth_type=iam \
+  bound_iam_principal_arn="${AWS_CONSUL_IAM_ROLE_ARN}" \
+  policies=consul,admin ttl=30m
+```
