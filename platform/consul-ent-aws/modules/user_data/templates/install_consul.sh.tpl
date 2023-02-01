@@ -69,6 +69,17 @@ vault {
   address = "${vault_addr}"
   ca_cert = "/opt/vault/tls/vault-ca.pem"
 }
+
+template {
+  source = "/etc/consul.d/consul.hcl.ctmpl"
+  destination = "/etc/consul.d/consul.hcl"
+}
+
+template {
+  contents = "{{ with secret \"consul/data/secret/enterpriselicense\" }}{{ .Data.data.key}}{{ end }}"
+  destination = "/etc/consul.d/consul.hclic"
+}
+
 EOF
 chown -R vault:vault /etc/vault-agent.d
 
@@ -92,7 +103,6 @@ LimitNOFILE=65536
 [Install]
 WantedBy=multi-user.target
 EOF
-
 
 
 ################
@@ -139,58 +149,59 @@ EOF
 # Install consul-template #
 ###########################
 
-wget https://releases.hashicorp.com/consul-template/0.30.0/consul-template_0.30.0_linux_amd64.zip
-unzip consul-template_0.30.0_linux_amd64.zip
-mv consul-template /usr/bin/
-rm consul-template_0.30.0_linux_amd64.zip
-mkdir /etc/consul-template.d/
+## wget https://releases.hashicorp.com/consul-template/0.30.0/consul-template_0.30.0_linux_amd64.zip
+## unzip consul-template_0.30.0_linux_amd64.zip
+## mv consul-template /usr/bin/
+## rm consul-template_0.30.0_linux_amd64.zip
+## mkdir /etc/consul-template.d/
+## 
+## cat > /etc/consul-template.d/consul-template.hcl << EOF 
+## log_level = "warn"
+## 
+## vault {
+##   # This is the address of the Vault leader. The protocol (http(s)) portion
+##   # of the address is required.
+## #  address = "${vault_addr}"
+##   address = "127.0.0.1:8200"
+## #  token = "${vault_token}"
+##   renew_token = false
+## 
+##   ssl {
+##     # This enables SSL. Specifying any option for SSL will also enable it.
+##     enabled = true
+##     ca_cert = "/opt/vault/tls/vault-ca.pem"
+##   }
+## }
+## 
+## template {
+##   source = "/etc/consul.d/consul.hcl.ctmpl"
+##   destination = "/etc/consul.d/consul.hcl"
+## }
+## 
+## template {
+##   contents = "{{ with secret \"consul/data/secret/enterpriselicense\" }}{{ .Data.data.key}}{{ end }}"
+##   destination = "/etc/consul.d/consul.hclic"
+## }
+## EOF
 
-cat > /etc/consul-template.d/consul-template.hcl << EOF 
-log_level = "warn"
+## cat > /etc/systemd/system/consul-template.service << EOF
+## [Unit]
+## Description=consul-template
+## Requires=network-online.target
+## #After=network-online.target consul.service vault.service
+## 
+## [Service]
+## EnvironmentFile=-/etc/sysconfig/consul-template
+## Restart=on-failure
+## ExecStart=/usr/bin/consul-template -config=/etc/consul-template.d
+## KillSignal=SIGINT
+## 
+## [Install]
+## WantedBy=multi-user.target
+## EOF
 
-vault {
-  # This is the address of the Vault leader. The protocol (http(s)) portion
-  # of the address is required.
-  address = "${vault_addr}"
-  token = "${vault_token}"
-  renew_token = false
-
-  ssl {
-    # This enables SSL. Specifying any option for SSL will also enable it.
-    enabled = true
-    ca_cert = "/opt/vault/tls/vault-ca.pem"
-  }
-}
-
-template {
-  source = "/etc/consul.d/consul.hcl.ctmpl"
-  destination = "/etc/consul.d/consul.hcl"
-}
-
-template {
-  contents = "{{ with secret \"consul/data/secret/enterpriselicense\" }}{{ .Data.data.key}}{{ end }}"
-  destination = "/etc/consul.d/consul.hclic"
-}
-EOF
-
-cat > /etc/systemd/system/consul-template.service << EOF
-[Unit]
-Description=consul-template
-Requires=network-online.target
-#After=network-online.target consul.service vault.service
-
-[Service]
-EnvironmentFile=-/etc/sysconfig/consul-template
-Restart=on-failure
-ExecStart=/usr/bin/consul-template -config=/etc/consul-template.d
-KillSignal=SIGINT
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-systemctl enable consul-template.service
-systemctl start consul-template.service
+## systemctl enable consul-template.service
+## systemctl start consul-template.service
 systemctl enable vault-agent.service
 systemctl start vault-agent.service
 systemctl start consul.service
