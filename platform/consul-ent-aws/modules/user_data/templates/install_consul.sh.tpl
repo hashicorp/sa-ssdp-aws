@@ -36,12 +36,13 @@ echo "export VAULT_CACERT=/opt/vault/tls/vault-ca.pem" >> /home/ubuntu/.bashrc
 # removing any default installation files from /etc/vault.d/
 rm -rf /etc/vault.d/*
 
+# removing any default installation files from /etc/consul.d/
+rm -rf /etc/consul.d/*
+
 # remove Vault Server SystemD unit
 rm /etc/systemd/system/vault.service
 
-## //TODO: create vault agent config file...
 # Create Vault agent config file
-#  cat > $HOME/sa-ssp-aws/inputs/vault-values.yaml << EOF
 mkdir -p /etc/vault-agent.d/
 cat > /etc/vault-agent.d/vault-agent.hcl << EOF
 
@@ -73,11 +74,13 @@ vault {
 template {
   source = "/etc/consul.d/consul.hcl.ctmpl"
   destination = "/etc/consul.d/consul.hcl"
+  command = "sudo systemctl restart consul.service"
 }
 
 template {
   contents = "{{ with secret \"consul/data/secret/enterpriselicense\" }}{{ .Data.data.key}}{{ end }}"
   destination = "/etc/consul.d/consul.hclic"
+  command = "sudo systemctl restart consul.service"
 }
 
 EOF
@@ -88,12 +91,11 @@ cat > /etc/systemd/system/vault-agent.service << EOF
 Description=Vault Agent
 Requires=network-online.target
 After=network-online.target
-
+Wants=consul.service
 [Service]
 KillMode=process
 KillSignal=SIGINT
 ExecStart=/usr/bin/vault agent -config /etc/vault-agent.d/vault-agent.hcl
-ExecReload=/bin/kill -HUP $MAINPID
 Restart=on-failure
 RestartSec=2
 StartLimitBurst=3
@@ -109,8 +111,10 @@ EOF
 # Consul Setup #
 ################
 
-# removing any default installation files from /opt/consul/tls/
-rm -rf /opt/consul/tls/*
+# create consul server dirs
+mkdir -p /opt/consul/tls/
+mkdir -p /opt/consul/data/
+chown -R consul:consul /opt/consul
 
 # /opt/consul/tls should be readable by all users of the system
 chmod 0755 /opt/consul/tls
@@ -143,6 +147,31 @@ acl {
 }
 encrypt="{{ with secret "consul/data/secret/gossip" }}{{ .Data.data.key}}{{ end }}"
 license_path="/etc/consul.d/consul.hclic"
+EOF
+
+rm /lib/systemd/system/consul.service
+cat > /lib/systemd/system/consul.service  << EOF
+[Unit]
+Description="HashiCorp Consul - A service mesh solution"
+Documentation=https://www.consul.io/
+Requires=network-online.target
+Requires=vault-agent.service
+After=vault-agent.service
+ConditionFileNotEmpty=/etc/consul.d/consul.hcl
+
+[Service]
+EnvironmentFile=-/etc/consul.d/consul.env
+User=consul
+Group=consul
+ExecStart=/usr/bin/consul agent -config-dir=/etc/consul.d/
+#ExecReload=/bin/kill --signal HUP $MAINPID
+KillMode=process
+KillSignal=SIGTERM
+Restart=on-failure
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target
 EOF
 
 systemctl enable vault-agent.service
