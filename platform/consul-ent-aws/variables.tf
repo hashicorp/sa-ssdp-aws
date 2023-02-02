@@ -28,22 +28,10 @@ variable "vault_ca" {
   description = "Vault CA"
 }
 
-variable "vault_token" {
-  type        = string
-  default     = null
-  description = "Vault token"
-}
-
 variable "vault_addr" {
   type        = string
   default     = null
   description = "Vault Cluster Address"
-}
-
-variable "aws_vault_iam_role_arn" {
-  type        = string
-  default     = null
-  description = "IAM Role ARN, for AWS Auto-Auth"
 }
 
 variable "resource_name_prefix" {
