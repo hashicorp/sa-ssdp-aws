@@ -1,10 +1,3 @@
-/**
- * Copyright © 2014-2022 HashiCorp, Inc.
- *
- * This Source Code is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of the MPL was not distributed with this project, you can obtain one at http://mozilla.org/MPL/2.0/.
- *
- */
-
 resource "aws_iam_instance_profile" "vault" {
   name_prefix = "${var.resource_name_prefix}-vault"
   role        = var.user_supplied_iam_role_name != null ? var.user_supplied_iam_role_name : aws_iam_role.instance_role[0].name
@@ -175,7 +168,7 @@ data "aws_iam_policy_document" "vault_agent_auto_auth" {
     ]
 
     resources = [
-      var.kms_key_arn, //FIXME: https://github.com/hashicorp/field-workshops-consul/blob/a8b48adb7f13bec9b0603badd2478a1cffdb72e9/instruqt-tracks/multi-cloud-service-networking-with-consul/assets/terraform/vault/aws.tf#L141
+      var.kms_key_arn,
       "${var.kms_key_arn}/*",
     ]
 
