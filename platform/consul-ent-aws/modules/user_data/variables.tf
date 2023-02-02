@@ -25,8 +25,8 @@ variable "consul_version" {
 }
 
 variable "consul_dc" {
-  type = string
-  defalt = "dc1"
+  type        = string
+  default     = "dc1"
 }
 
 variable "vault_version" {
