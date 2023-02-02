@@ -30,6 +30,7 @@ else
   vault secrets enable -path=consul kv-v2
   vault kv put consul/secret/enterpriselicense key="$(cat $HOME/sa-ssp-aws/inputs/consul.hclic)"
   vault kv put consul/secret/gossip key="$(consul keygen)"
+  vault kv put consul/secret/initial_management key=$(cat /proc/sys/kernel/random/uuid)
   
   # Enable PKI for Conusl Certs
   vault secrets enable pki

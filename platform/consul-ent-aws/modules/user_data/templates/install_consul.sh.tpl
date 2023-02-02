@@ -140,9 +140,9 @@ acl {
   enabled        = true
   default_policy = "deny"
   enable_token_persistence = true
-#  tokens {
-#    master = ""
-#  }
+  tokens {
+    initial_management = "{{ with secret "consul/data/secret/initial_management" }}{{ .Data.data.key}}{{ end }}"
+  }
 }
 encrypt="{{ with secret "consul/data/secret/gossip" }}{{ .Data.data.key}}{{ end }}"
 license_path="/etc/consul.d/consul.hclic"

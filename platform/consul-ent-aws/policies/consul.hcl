@@ -6,6 +6,10 @@ path "consul/data/secret/enterpriselicense"
 {
   capabilities = ["read"]
 }
+path "consul/data/secret/initial_management"
+{
+  capabilities = ["read"]
+}
 path "pki/issue/consul"
 {
   capabilities = ["read","update"]
