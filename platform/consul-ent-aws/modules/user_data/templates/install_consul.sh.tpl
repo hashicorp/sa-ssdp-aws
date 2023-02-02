@@ -27,11 +27,6 @@ chmod 0755 /opt/vault/tls
 
 echo "${vault_ca}" > /opt/vault/tls/vault-ca.pem
 
-# //TODO: Remove for GA!
-echo "export VAULT_TOKEN=${vault_token}" >> /home/ubuntu/.bashrc
-echo "export VAULT_ADDR=${vault_addr}" >> /home/ubuntu/.bashrc
-echo "export VAULT_CACERT=/opt/vault/tls/vault-ca.pem" >> /home/ubuntu/.bashrc
-
 
 # removing any default installation files from /etc/vault.d/
 rm -rf /etc/vault.d/*
@@ -40,7 +35,10 @@ rm -rf /etc/vault.d/*
 rm -rf /etc/consul.d/*
 
 # remove Vault Server SystemD unit
+systemctl stop vault.service
+systemctl disable vault.service
 rm /etc/systemd/system/vault.service
+rm /usr/lib/systemd/system/vault.service
 
 # Create Vault agent config file
 mkdir -p /etc/vault-agent.d/
@@ -128,6 +126,7 @@ advertise_addr      = "$${local_ipv4}"
 client_addr         = "0.0.0.0"
 log_level           = "INFO"
 ui                  = true
+
 # AWS cloud join
 retry_join          = ["provider=aws tag_key=${name}-consul tag_value=server"]
 # Max connections for the HTTP API
@@ -138,8 +137,8 @@ performance {
     raft_multiplier = 1
 }
 acl {
-  enabled        = false #TODO: true
-  default_policy = "allow"
+  enabled        = true
+  default_policy = "deny"
   enable_token_persistence = true
 #  tokens {
 #    master = ""
@@ -174,6 +173,8 @@ LimitNOFILE=65536
 WantedBy=multi-user.target
 EOF
 
+systemctl daemon-reload
+systemctl reset-failed
 systemctl enable vault-agent.service
 systemctl start vault-agent.service
 systemctl start consul.service

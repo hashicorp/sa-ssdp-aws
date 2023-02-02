@@ -1,13 +1,9 @@
-region                    = "us-west-2"
+region                    = "<aws-region>"
+vpc_id                    = "<vpc-id>"
+private_subnet_ids        = ["<subnet-id>","<subnet-id>","<subnet-id>"]
 allowed_inbound_cidrs_lb  = ["10.0.0.0/16"]
 
-instance_type           = "m5.large"    #default = m5.xlarge
-node_count              = 3             #default = 5
-
-private_subnet_ids      = ["subnet-00e237c48afccb31a","subnet-0d4b4c2cbf2ef5c99","subnet-0949461f5b29411f5"]
-vpc_id                  = "vpc-02c8cc2b8372ab0a3"
-
-vault_ca = "../../inputs/vault-ca.pem"
-
-vault_addr = "https://sa-vault-lb-77577ca6bda53624.elb.us-west-2.amazonaws.com:8200"
-vault_token = "hvs.o2nWyPQviXePe28XgSdpUdpg"
+instance_type             = "m5.large"               #default = m5.xlarge
+node_count                = 3                        #default = 5
+vault_ca                  = "../../inputs/vault-ca.pem"
+vault_addr                = "https://<vault_lb_dns_name>:8200"
