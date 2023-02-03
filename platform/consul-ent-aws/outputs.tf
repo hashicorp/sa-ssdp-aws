@@ -4,7 +4,6 @@ output "asg_name" {
   value = module.vm.asg_name
 }
 
-
 output "aws_consul_iam_role_arn" {
   value = module.iam.aws_consul_iam_role_arn
 }
