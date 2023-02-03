@@ -10,10 +10,10 @@ then
    echo -e "\tVAULT_TOKEN           = ${VAULT_TOKEN}"
 
    echo -e "\nHints:"
-   echo -e "terraform output -state \$HOME/sa-ssp-aws/platform/vault-ent-aws/terraform.tfstate -raw cert_pem > \$HOME/sa-ssp-aws/inputs/vault-ca.pem"
-   echo -e "export VAULT_CACERT=\$HOME/sa-ssp-aws/inputs/vault-ca.pem" 
-   echo -e "export VAULT_ADDR=https://\$(terraform output -state \$HOME/sa-ssp-aws/platform/vault-ent-aws/terraform.tfstate -raw vault_lb_dns_name):8200"
-   echo -e "export VAULT_TOKEN=\$(cat \$HOME/sa-ssp-aws/inputs/aws_vault_keys.json | jq -r .root_token)" 
+   echo -e "terraform output -state \$HOME/sa-ssdp-aws/platform/vault-ent-aws/terraform.tfstate -raw cert_pem > \$HOME/sa-ssdp-aws/inputs/vault-ca.pem"
+   echo -e "export VAULT_CACERT=\$HOME/sa-ssdp-aws/inputs/vault-ca.pem" 
+   echo -e "export VAULT_ADDR=https://\$(terraform output -state \$HOME/sa-ssdp-aws/platform/vault-ent-aws/terraform.tfstate -raw vault_lb_dns_name):8200"
+   echo -e "export VAULT_TOKEN=\$(cat \$HOME/sa-ssdp-aws/inputs/aws_vault_keys.json | jq -r .root_token)" 
 
 else
 

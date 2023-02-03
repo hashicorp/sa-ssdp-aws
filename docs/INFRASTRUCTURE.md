@@ -8,7 +8,7 @@ Choose one of the two options below.
 
 ## Build Insfrastructure using Terraform (OPTION 1)
 
-**NOTE:** working directory: `sa-ssp-aws/infrastructure/`
+**NOTE:** working directory: `sa-ssdp-aws/infrastructure/`
 
 1. Clone this repo
 2. Provide AWS credentials
@@ -17,7 +17,7 @@ Choose one of the two options below.
 5. Verify infrastrucutre deployment
 
 
-You may inspect the default values in the `sa-ssp-aws/infrastructure/variables.tf` file, and overwrite these details in the `terraform.tfvars`.
+You may inspect the default values in the `sa-ssdp-aws/infrastructure/variables.tf` file, and overwrite these details in the `terraform.tfvars`.
 
 ### 1. Deploy the Insfrastructure
 
@@ -36,7 +36,7 @@ terraform apply
 
 ```sh
 bastian_platsvcs = "ssh -o 'IdentitiesOnly yes' -i '../inputs/bastian-key.pem' ubuntu@ec2-54-189-161-81.us-west-2.compute.amazonaws.com"
-bastian_platsvcs_copy_licenses = "scp -o 'IdentitiesOnly yes' -i '../inputs/bastian-key.pem' ../inputs/* ubuntu@ec2-54-189-161-81.us-west-2.compute.amazonaws.com:/home/ubuntu/sa-ssp-aws/inputs/"
+bastian_platsvcs_copy_licenses = "scp -o 'IdentitiesOnly yes' -i '../inputs/bastian-key.pem' ../inputs/* ubuntu@ec2-54-189-161-81.us-west-2.compute.amazonaws.com:/home/ubuntu/sa-ssdp-aws/inputs/"
 vpc_app_microservices_id = "vpc-0a7be785bdb291c45"
 vpc_payments = "vpc-05012a4b83dbc80b0"
 vpc_platform_services_id = "vpc-053b252716a672bc5"
@@ -51,7 +51,7 @@ your_ip_addr = "157.131.55.230"
 Using the Terraform output `bastian_platsvcs_copy_licenses` string, copy the vault and consul enterprise license to the bastian host, e.g.:
 
 ```sh
-scp -o 'IdentitiesOnly yes' -i '../inputs/bastian-key.pem' ../inputs/* ubuntu@ec2-54-189-161-81.us-west-2.compute.amazonaws.com:/home/ubuntu/sa-ssp-aws/inputs/
+scp -o 'IdentitiesOnly yes' -i '../inputs/bastian-key.pem' ../inputs/* ubuntu@ec2-54-189-161-81.us-west-2.compute.amazonaws.com:/home/ubuntu/sa-ssdp-aws/inputs/
 ```
 
 
@@ -177,8 +177,8 @@ Using SSH, or the AWS Systems Manager (`aws ssm start-session --target`), connec
 
 ```sh
 cd ~
-git clone https://github.com/hashicorp/sa-ssp-aws.git
-cd sa-ssp-aws
+git clone https://github.com/hashicorp/sa-ssdp-aws.git
+cd sa-ssdp-aws
 ```
 
 Verify you have the required binaries install (listed in the REQUIREMENTS section above).
@@ -197,7 +197,7 @@ sudo apt install consul-enterprise=1.12.8+ent* vault-enterprise=1.12.2+ent* terr
 
 ### 3. Prepare the Platform Service deployment
 
-Using the information collected in [1. Collect the required infrastructure values](#1.-Collect-the-required-infrastructure-values) above from the aws cli commands, create a new `sa-ssp-aws/platform/vault-ent-aws/terraform.tfvars` file and enter the appropriate value.
+Using the information collected in [1. Collect the required infrastructure values](#1.-Collect-the-required-infrastructure-values) above from the aws cli commands, create a new `sa-ssdp-aws/platform/vault-ent-aws/terraform.tfvars` file and enter the appropriate value.
 
 Apply the outputs collected above to the terraform.tfvars file in `platform/vault-ent-aws`, e.g.:
 

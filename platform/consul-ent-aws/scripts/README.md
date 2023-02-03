@@ -78,7 +78,7 @@ terraform apply
 Export the Vault token provided in `aws_vault_keys.json`
 
 ```sh
-export VAULT_TOKEN=$(cat $HOME/sa-ssp-aws/inputs/aws_vault_keys.json | jq -r .root_token)
+export VAULT_TOKEN=$(cat $HOME/sa-ssdp-aws/inputs/aws_vault_keys.json | jq -r .root_token)
 ./scripts/auto-setup-consul.sh
 ```
 

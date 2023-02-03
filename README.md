@@ -1,5 +1,5 @@
-# sa-ssp-aws
-Solution Architecture - Secure Service Platform - AWS
+# sa-ssdp-aws
+Solution Architecture - Secure Service Delivery Platform - AWS
 
 - [Overiew](#Overview)
   - [Infrastructure (Choose 1)](#Infrastructure (Choose 1))
@@ -39,7 +39,7 @@ You will need to choose one of the following options:
 
 #### 1. Build with Terraform
 
-The `sa-ssp-aws/infrastucture/` directory of this reposiory contains terraform infrastructure definitions to build out AWS resource for hosting the Secure Service Platform deployment. Once you've completed the [REQUIREMENTS](#REQUIREMENTS) section below you are ready to execute the `terraform apply` within the `infrastructure/` directory.
+The `sa-ssdp-aws/infrastucture/` directory of this reposiory contains terraform infrastructure definitions to build out AWS resource for hosting the Secure Service Delivery Platform deployment. Once you've completed the [REQUIREMENTS](#REQUIREMENTS) section below you are ready to execute the `terraform apply` within the `infrastructure/` directory.
 
 The terraform apply takes apprximately 13 minutes to deploy.
 
@@ -85,7 +85,7 @@ If you have an existing environment, or wish to build your own VPCs and EKS clus
 
 Clone this repo:
 ```sh
-git clone https://github.com/hashicorp/sa-ssp-aws.git
+git clone https://github.com/hashicorp/sa-ssdp-aws.git
 ```
 
 #### 2. Export AWS credentions
@@ -102,7 +102,7 @@ export AWS_SECRET_ACCESS_KEY=<aws_secret_access_key>
 You require Enterprise Licesnes for both Vault and Consul. Save them somewhere locally, e.g.:
 
 ```sh
-ls -l1 ./sa-ssp-aws/inputs
+ls -l1 ./sa-ssdp-aws/inputs
 README.md
 consul.hclic
 vault.hclic
