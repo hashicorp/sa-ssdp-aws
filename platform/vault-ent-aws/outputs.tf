@@ -19,6 +19,11 @@ output "vault_lb_dns_name" {
   value       = module.loadbalancer.vault_lb_dns_name
 }
 
+output "vault_cluster_addr" {
+  description = "DNS name of Vault load balancer"
+  value       = "https://${module.loadbalancer.vault_lb_dns_name}:8200"
+}
+
 output "vault_lb_zone_id" {
   description = "Zone ID of Vault load balancer"
   value       = module.loadbalancer.vault_lb_zone_id
