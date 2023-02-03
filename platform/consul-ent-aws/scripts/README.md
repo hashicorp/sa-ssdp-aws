@@ -2,8 +2,8 @@
 
 The following scripts automate the many commands required to configure Vault Ent to support Consul Ent.
 
-`auto-setup-vault.sh` - Configure Vault with the secrets required for secure Consul operation
-`auto-setup-consul.sh` - Confgure the Vault policy for Consul IAM authentication
+* `auto-setup-vault.sh` - Configure Vault with the secrets required for secure Consul operation
+* `auto-setup-consul.sh` - Confgure the Vault policy for Consul IAM authentication
 
 ## `auto-setup-vault.sh` - Requirements
 
