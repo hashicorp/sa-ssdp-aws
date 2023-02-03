@@ -10,12 +10,4 @@ The Vault Cluster must be operational before the Consul Cluster can be created, 
 * Secrets Management - Gossip Key, ACL Bootstrap Token, RPC certificate
 * Consul Connect CA - certificate minting for the service mesh proxies
 
-## Create a Vault Cluster
-
-Working directory: `<git_repo>/platform/vault-ent-aws`
-
-## Create a Consul Cluster
-
-Working directory: `<git_repo>/platform/consul-ent-aws`
-
-### Requirements
+Documentation can be found [../docs/PLATFORM.md](../docs/PLATFORM.md)
