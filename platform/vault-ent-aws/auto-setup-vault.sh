@@ -3,8 +3,8 @@
 ## HINTS:
 #
 # terraform output -raw cert_pem > $HOME/sa-ssp-aws/inputs/vault-ca.pem
-# VAULT_CACERT=$HOME/sa-ssp-aws/inputs/vault-ca.pem
-# VAULT_ADDR=https://$(terraform output -raw vault_lb_dns_name):8200
+# export VAULT_CACERT=$HOME/sa-ssp-aws/inputs/vault-ca.pem
+# export VAULT_ADDR=https://$(terraform output -raw vault_lb_dns_name):8200
 
 if [ -z $AWS_ACCESS_KEY_ID ] || [ -z $AWS_SECRET_ACCESS_KEY ] || [ -z $VAULT_ADDR ] || [ -z $VAULT_CACERT ]
 then
