@@ -6,6 +6,7 @@ In this section you will deploy platform services for Secrets Management and Ser
 * Secrets Management, for both the Consul Mesh and deployed apps/services, is delivered using Vault
 
 The Vault Cluster must be operational before the Consul Cluster can be created, so that Consul can be configured to use Vault for:
+
 * Secrets Management - Gossip Key, ACL Bootstrap Token, RPC certificate
 * Consul Connect CA - certificate minting for the service mesh proxies
 
@@ -13,16 +14,8 @@ The Vault Cluster must be operational before the Consul Cluster can be created, 
 
 Working directory: `<git_repo>/platform/vault-ent-aws`
 
-
 ## Create a Consul Cluster
 
 Working directory: `<git_repo>/platform/consul-ent-aws`
 
 ### Requirements
-
-**NOTE:** We need to replace this 'CA create' requirement with the appropriate setup in Vault cluster.
-
-```
-consul tls ca create
-consul tls cert create -server
-```
