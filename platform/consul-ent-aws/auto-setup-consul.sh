@@ -18,4 +18,3 @@ else
       policies=consul,admin ttl=30m
   fi
 fi
-
