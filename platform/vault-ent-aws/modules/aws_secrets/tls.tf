@@ -21,9 +21,6 @@ resource "tls_self_signed_cert" "ca" {
 
   is_ca_certificate = true
 
-  #  provisioner "local-exec" {
-  #    command = "echo '${tls_self_signed_cert.ca.cert_pem}' > ./vault-ca.pem"
-  #  }
 }
 
 # Generate another private key. This one will be used
@@ -32,9 +29,6 @@ resource "tls_private_key" "server" {
   algorithm = "RSA"
   rsa_bits  = 2048
 
-  provisioner "local-exec" {
-    command = "echo '${tls_private_key.server.private_key_pem}' > ../../inputs/vault-key.pem"
-  }
 }
 
 resource "tls_cert_request" "server" {
@@ -69,9 +63,6 @@ resource "tls_locally_signed_cert" "server" {
     "server_auth",
   ]
 
-  #  provisioner "local-exec" {
-  #    command = "echo '${tls_locally_signed_cert.server.cert_pem}' > ./vault-crt.pem"
-  #  }
 }
 
 locals {
