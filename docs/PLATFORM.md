@@ -126,6 +126,7 @@ vault operator raft list-peers
 ```
 
 You should see something like:
+
 ```sh
 Node                   Address              State       Voter
 ----                   -------              -----       -----
@@ -160,6 +161,7 @@ vault secrets enable -path=consul kv-v2
 Paste the contents of your locally saved Consul license located: `$HOME/sa-ssp-aws/inputs/consul.hclic`
 
 Store Consul license in Vault:
+
 ```sh
 vault kv put consul/secret/enterpriselicense key="$(cat $HOME/sa-ssp-aws/inputs/consul.hclic)"
 ```
@@ -181,6 +183,7 @@ version            1
 ```
 
 You can read the license with:
+
 ```sh
 vault kv get consul/secret/enterpriselicense
 ```
@@ -218,8 +221,8 @@ vault kv get consul/secret/gossip
 
 https://developer.hashicorp.com/consul/tutorials/vault-secure/vault-pki-consul-secure-tls
 
-
 Setup PKI secrets engine:
+
 ```sh
 vault secrets enable pki
 ```
@@ -248,7 +251,8 @@ vault write pki/roles/consul-server \
 ```
 
 //TODO: this error comes back from `generate_lease`, why?:
-```
+
+```sh
 WARNING! The following warnings were returned from Vault:
 
   * it is encouraged to disable generate_lease and rely on PKI's native
@@ -256,11 +260,9 @@ WARNING! The following warnings were returned from Vault:
   large numbers of issued certificates
 ```
 
-
 ```sh
 vault secrets enable -path connect-root pki
 ```
-
 
 ### n. Install the Vault Injector into k8s:
 
@@ -276,21 +278,20 @@ EOF
 
 ```sh
 helm repo add hashicorp https://helm.releases.hashicorp.com && helm repo update
-#helm install vault -f ./vault-values.yaml hashicorp/vault --version "0.20.0"
-helm install vault -f $HOME/sa-ssp-aws/inputs/vault-values.yaml hashicorp/vault 
+helm install vault -f $HOME/sa-ssp-aws/inputs/vault-values.yaml hashicorp/vault  --version "0.23.0" 
 ```
-//TODO: pin this to avoid hashicorps breaking changes
 
 **NOTE:** If you get the following error, you likely missed the `update-kubeconfig` command in the 'Infrastructure' section:
+
 ```sh
 Error: Kubernetes cluster unreachable: Get "http://localhost:8080/version?timeout=32s": dial tcp 127.0.0.1:8080: connect: connection refused
 ```
 
 To remedy, execute:
+
 ```sh
 aws eks update-kubeconfig --region us-west-2 --name app_svcs-eks
 ```
-
 
 ### n. Enable AWS Auth
 
@@ -313,12 +314,11 @@ vault write auth/aws/role/vault \
 vault auth enable kubernetes
 ```
 
-**NOTE** The Vault Injector Agent needs to be installed before these commands will work. If the Vault Injector Agent installed failed you will see:
+**NOTE** The Vault Injector Agent needs to be installed before these commands will work. If the Vault Injector Agent installation failed you will see:
 
 ```sh
 Error from server (NotFound): serviceaccounts "vault" not found
 ```
-
 
 ```sh
 export token_reviewer_jwt=$(kubectl get secret \
@@ -336,7 +336,6 @@ export kubernetes_ca_cert=$(kubectl get secret \
 export kubernetes_host_url=$(kubectl config view --raw --minify --flatten \
   -o jsonpath='{.clusters[].cluster.server}')
 ```
-
 
 ```sh
 vault write auth/kubernetes/config \
