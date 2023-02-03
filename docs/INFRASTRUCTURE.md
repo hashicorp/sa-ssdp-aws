@@ -29,23 +29,21 @@ terraform apply
 
 **NOTE:** The terraform apply takes apprximately 13 minutes to deploy.
 
-
 ### 2. Review Output & Prepare Platform deployment
 
-//TODO: Check this before GA, and annonymize
-
 ```sh
-bastian_platsvcs = "ssh -o 'IdentitiesOnly yes' -i '../inputs/bastian-key.pem' ubuntu@ec2-54-189-161-81.us-west-2.compute.amazonaws.com"
-bastian_platsvcs_copy_licenses = "scp -o 'IdentitiesOnly yes' -i '../inputs/bastian-key.pem' ../inputs/* ubuntu@ec2-54-189-161-81.us-west-2.compute.amazonaws.com:/home/ubuntu/sa-ssp-aws/inputs/"
-vpc_app_microservices_id = "vpc-0a7be785bdb291c45"
-vpc_payments = "vpc-05012a4b83dbc80b0"
-vpc_platform_services_id = "vpc-053b252716a672bc5"
+app_eks_cluster = "app_svcs-eks"
+bastian_platsvcs = "ssh -o 'IdentitiesOnly yes' -i '../inputs/bastian-key.pem' ubuntu@ec2-xx-xx-xx-xx.us-west-2.compute.amazonaws.com"
+bastian_platsvcs_copy_licenses = "scp -o 'IdentitiesOnly yes' -i '../inputs/bastian-key.pem' ../inputs/* ubuntu@ec2-xx-xx-xx-xx.us-west-2.compute.amazonaws.com:/home/ubuntu/sa-ssp-aws/inputs/"
+vpc_app_microservices_id = "vpc-05cbfd59fe3becfe8"
+vpc_payments = "vpc-0db8321b6bd7520f3"
+vpc_platform_services_id = "vpc-0ddf77f8364ab5812"
 vpc_platform_services_public_subnets = [
-  "subnet-071c6ecca31b3a4f7",
-  "subnet-0ae1cfda61683bf6c",
-  "subnet-016b8e5cec0d7ddeb",
+  "subnet-0b63e32a5d89fbfbd",
+  "subnet-0db0f25661a9c33f6",
+  "subnet-00a76c546bab2e99b",
 ]
-your_ip_addr = "157.131.55.230"
+your_ip_addr = "XX.XX.XX.XX"
 ```
 
 Using the Terraform output `bastian_platsvcs_copy_licenses` string, copy the vault and consul enterprise license to the bastian host, e.g.:
@@ -54,11 +52,7 @@ Using the Terraform output `bastian_platsvcs_copy_licenses` string, copy the vau
 scp -o 'IdentitiesOnly yes' -i '../inputs/bastian-key.pem' ../inputs/* ubuntu@ec2-54-189-161-81.us-west-2.compute.amazonaws.com:/home/ubuntu/sa-ssp-aws/inputs/
 ```
 
-
 ### 3. Connect to the Bastian Host
-
-//TODO: Should this be an AWS System Manager session, or SSH? Or should we provide both?
-
 
 Using the credentials provided in the terraform output, connect to the bastian host. Example:
 
@@ -82,11 +76,13 @@ aws eks update-kubeconfig --region us-west-2 --name app_svcs-eks
 ```
 
 You should see:
+
 ```sh
 Added new context arn:aws:eks:us-west-2:491229875064:cluster/app_svcs-eks to /home/ubuntu/.kube/config
 ```
 
 Verify communications with:
+
 ```sh
 kubectl cluster-info
 kubectl get svc

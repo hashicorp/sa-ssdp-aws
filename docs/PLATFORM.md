@@ -16,8 +16,6 @@ aws eks update-kubeconfig --region us-west-2 --name app_svcs-eks
 
 With your AWS credentials exported, and the correct information added to your `$HOME/sa-ssp-aws/platform/vault-ent-aws/terraform.tfvars` from the steps above, you should now be able to run:
 
-//TODO: ensure only the required information is added to the `sa-ssp-aws/inputs/terraform.tf-platform`
-
 ```sh
 cd $HOME/sa-ssp-aws/platform/vault-ent-aws
 terraform init
@@ -227,8 +225,6 @@ Setup PKI secrets engine:
 vault secrets enable pki
 ```
 
-//TODO: why is the example setting 10 year certs? WHY???
-
 NOTE: "dc1.consul" is: `<consul_dc>.<consul_tld>`
 
 ```sh
@@ -250,7 +246,7 @@ vault write pki/roles/consul-server \
     max_ttl="720h"
 ```
 
-//TODO: this error comes back from `generate_lease`, why?:
+//TODO: the following error comes back from `generate_lease`, why? This has been raised with engineering. Awaiting response:
 
 ```sh
 WARNING! The following warnings were returned from Vault:
@@ -299,7 +295,6 @@ To use IAM for Vault Agent Auth:
 
 ```sh
 vault auth enable aws
-# vault write -force auth/aws/config/client  #TODO: this was in the docs????
 
 AWS_VAULT_IAM_ROLE_ARN=$(terraform output -raw aws_vault_iam_role_arn)
 vault write auth/aws/role/vault \
