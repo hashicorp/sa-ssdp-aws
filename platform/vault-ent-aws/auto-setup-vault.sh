@@ -1,18 +1,19 @@
 #!/bin/bash
 
-## HINTS:
-#
-# terraform output -raw cert_pem > $HOME/sa-ssp-aws/inputs/vault-ca.pem
-# export VAULT_CACERT=$HOME/sa-ssp-aws/inputs/vault-ca.pem
-# export VAULT_ADDR=https://$(terraform output -raw vault_lb_dns_name):8200
-
-if [ -z $AWS_ACCESS_KEY_ID ] || [ -z $AWS_SECRET_ACCESS_KEY ] || [ -z $VAULT_ADDR ] || [ -z $VAULT_CACERT ]
+if [ -z $AWS_ACCESS_KEY_ID ] || [ -z $AWS_SECRET_ACCESS_KEY ] || [ -z $VAULT_ADDR ] || [ -z $VAULT_CACERT ] || [ -z $AWS_VAULT_IAM_ROLE_ARN ]
 then
    echo "Required env vars:"
-   echo -e "\tAWS_ACCESS_KEY_ID     = ${AWS_ACCESS_KEY_ID}"
-   echo -e "\tAWS_SECRET_ACCESS_KEY = ${AWS_SECRET_ACCESS_KEY}"
-   echo -e "\tVAULT_ADDR            = ${VAULT_ADDR}"
-   echo -e "\tVAULT_CACERT          = ${VAULT_CACERT}"
+   echo -e "AWS_ACCESS_KEY_ID      = ${AWS_ACCESS_KEY_ID}"
+   echo -e "AWS_SECRET_ACCESS_KEY  = ${AWS_SECRET_ACCESS_KEY}"
+   echo -e "VAULT_ADDR             = ${VAULT_ADDR}"
+   echo -e "VAULT_CACERT           = ${VAULT_CACERT}"
+   echo -e "AWS_VAULT_IAM_ROLE_ARN = ${AWS_VAULT_IAM_ROLE_ARN}"
+
+   echo -e "\nHints:"
+   echo -e "terraform output -state \$HOME/sa-ssp-aws/vault-ent-aws/terraform.tfstate -raw cert_pem > \$HOME/sa-ssp-aws/inputs/vault-ca.pem"
+   echo -e "export VAULT_CACERT=\$HOME/sa-ssp-aws/inputs/vault-ca.pem" 
+   echo -e "export VAULT_ADDR=https://\$(terraform output -state \$HOME/sa-ssp-aws/vault-ent-aws/terraform.tfstate -raw vault_lb_dns_name):8200"
+   echo -e "export AWS_VAULT_IAM_ROLE_ARN=\$(terraform output -state \$HOME/sa-ssp-aws/vault-ent-aws/terraform.tfstate -raw aws_vault_iam_role_arn)"
 
 else
 
@@ -65,7 +66,6 @@ else
   echo "Enable AWS Auth w/ IAM Roles..."
   vault auth enable aws
 
-  AWS_VAULT_IAM_ROLE_ARN=$(terraform output -raw aws_vault_iam_role_arn)
   vault write auth/aws/role/vault \
     auth_type=iam \
     bound_iam_principal_arn=${AWS_VAULT_IAM_ROLE_ARN} \
