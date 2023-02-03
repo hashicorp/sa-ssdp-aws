@@ -31,7 +31,7 @@ output "bastian_platsvcs" {
 }
 
 output "bastian_platsvcs_copy_licenses" {
-  value = "scp -o 'IdentitiesOnly yes' -i '../inputs/bastian-key.pem' ../inputs/* ubuntu@${aws_instance.bastian_platsvcs.public_dns}:/home/ubuntu/sa-ssp-aws/inputs/"
+  value = "scp -o 'IdentitiesOnly yes' -i '../inputs/bastian-key.pem' ../inputs/* ubuntu@${aws_instance.bastian_platsvcs.public_dns}:/home/ubuntu/sa-ssdp-aws/inputs/"
 }
 
 

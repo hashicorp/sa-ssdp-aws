@@ -1,6 +1,6 @@
 # PLATFORM
 
-NOTE: the working directory for this sectin is: `sa-ssp-aws/platform/`
+NOTE: the working directory for this sectin is: `sa-ssdp-aws/platform/`
 
 In this section you will deploy two Auto Scale Groups (ASGs) of five EC2 servers each: 1 Vault ASG, 1 Consul ASG.
 
@@ -14,10 +14,12 @@ Grab your EKS kubeconfig for vault auth:
 aws eks update-kubeconfig --region us-west-2 --name app_svcs-eks
 ```
 
-With your AWS credentials exported, and the correct information added to your `$HOME/sa-ssp-aws/platform/vault-ent-aws/terraform.tfvars` from the steps above, you should now be able to run:
+With your AWS credentials exported, and the correct information added to your `$HOME/sa-ssdp-aws/platform/vault-ent-aws/terraform.tfvars` from the steps above, you should now be able to run:
+
+//TODO: ensure only the required information is added to the `sa-ssdp-aws/inputs/terraform.tf-platform`
 
 ```sh
-cd $HOME/sa-ssp-aws/platform/vault-ent-aws
+cd $HOME/sa-ssdp-aws/platform/vault-ent-aws
 terraform init
 terraform plan
 ```
@@ -51,13 +53,13 @@ You will need the `vault_lb_dns_name` value in the following steps.
 
 Save the Vault CA locally:
 ```sh
-terraform output -raw cert_pem > $HOME/sa-ssp-aws/inputs/vault-ca.pem
+terraform output -raw cert_pem > $HOME/sa-ssdp-aws/inputs/vault-ca.pem
 ```
 
 Add the VAULT_CACERT and VAULT_ADDR environment variables to you `~/.bashrc`:
 
 ```sh
-echo "export VAULT_CACERT=$HOME/sa-ssp-aws/inputs/vault-ca.pem" >> ~/.bashrc
+echo "export VAULT_CACERT=$HOME/sa-ssdp-aws/inputs/vault-ca.pem" >> ~/.bashrc
 echo "export VAULT_ADDR=https://$(terraform output -raw vault_lb_dns_name):8200" >> ~/.bashrc
 source ~/.bashrc
 ```
@@ -156,12 +158,12 @@ vault secrets enable -path=consul kv-v2
 ```
 
 
-Paste the contents of your locally saved Consul license located: `$HOME/sa-ssp-aws/inputs/consul.hclic`
+Paste the contents of your locally saved Consul license located: `$HOME/sa-ssdp-aws/inputs/consul.hclic`
 
 Store Consul license in Vault:
 
 ```sh
-vault kv put consul/secret/enterpriselicense key="$(cat $HOME/sa-ssp-aws/inputs/consul.hclic)"
+vault kv put consul/secret/enterpriselicense key="$(cat $HOME/sa-ssdp-aws/inputs/consul.hclic)"
 ```
 
 You should see a response resembling:
@@ -265,7 +267,7 @@ vault secrets enable -path connect-root pki
 Disconnect from your AWS SSM session (don't run this in the Vault ASG instance):
 
 ```sh
-cat > $HOME/sa-ssp-aws/inputs/vault-values.yaml << EOF
+cat > $HOME/sa-ssdp-aws/inputs/vault-values.yaml << EOF
 injector:
   enabled: true
   externalVaultAddr: "${VAULT_ADDR}"
@@ -274,7 +276,7 @@ EOF
 
 ```sh
 helm repo add hashicorp https://helm.releases.hashicorp.com && helm repo update
-helm install vault -f $HOME/sa-ssp-aws/inputs/vault-values.yaml hashicorp/vault  --version "0.23.0" 
+helm install vault -f $HOME/sa-ssdp-aws/inputs/vault-values.yaml hashicorp/vault  --version "0.23.0" 
 ```
 
 **NOTE:** If you get the following error, you likely missed the `update-kubeconfig` command in the 'Infrastructure' section:
@@ -388,11 +390,11 @@ https://developer.hashicorp.com/consul/tutorials/vault-secure/kubernetes-vault-c
 ### 1. Create Consul Auto-Scale Group
 
 ```sh
-cd $HOME/sa-ssp-aws/platform/consul-ent-aws
+cd $HOME/sa-ssdp-aws/platform/consul-ent-aws
 ```
 
 ```sh
-cp $HOME/sa-ssp-aws/inputs/terraform.tfvars-platform $HOME/sa-ssp-aws/platform/consul-ent-aws/terraform.tfvars
+cp $HOME/sa-ssdp-aws/inputs/terraform.tfvars-platform $HOME/sa-ssdp-aws/platform/consul-ent-aws/terraform.tfvars
 ```
 
 ```sh

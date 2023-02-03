@@ -41,12 +41,12 @@ rm session-manager-plugin.deb
 
 export HOME=/home/ubuntu
 cd $HOME
-git config --global --add safe.directory $HOME/sa-ssp-aws
-git clone https://github.com/hashicorp/sa-ssp-aws.git
-cd sa-ssp-aws
+git config --global --add safe.directory $HOME/sa-ssdp-aws
+git clone https://github.com/hashicorp/sa-ssdp-aws.git
+cd sa-ssdp-aws
 #git checkout n8-TryingToMakeItWork  
-#git config --global --add safe.directory /home/ubuntu/sa-ssp-aws
+#git config --global --add safe.directory /home/ubuntu/sa-ssdp-aws
 git checkout ${sa_release_version} #//FIXME: Change to release tag for GA!
-sudo chown -R ubuntu:ubuntu $HOME/sa-ssp-aws
+sudo chown -R ubuntu:ubuntu $HOME/sa-ssdp-aws
 
 exit 0
