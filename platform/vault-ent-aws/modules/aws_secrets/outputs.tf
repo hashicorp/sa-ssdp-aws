@@ -8,11 +8,6 @@ output "leader_tls_servername" {
   value       = var.shared_san
 }
 
-#output "private_subnet_ids" {
-#  description = "Private subnet IDs"
-#  value       = module.vpc.private_subnet_ids
-#}
-
 output "secrets_manager_arn" {
   description = "ARN of secrets_manager secret"
   value       = aws_secretsmanager_secret.tls.arn
