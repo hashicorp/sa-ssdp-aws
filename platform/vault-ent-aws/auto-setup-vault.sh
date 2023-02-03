@@ -8,7 +8,12 @@
 
 if [ -z $AWS_ACCESS_KEY_ID ] || [ -z $AWS_SECRET_ACCESS_KEY ] || [ -z $VAULT_ADDR ] || [ -z $VAULT_CACERT ]
 then
-   echo -e "Required env vars:\n\tAWS_ACCESS_KEY_ID\n\tAWS_SECRET_ACCESS_KEY\n\tVAULT_ADDR\n\tVAULT_CACERT"
+   echo "Required env vars:"
+   echo -e "\tAWS_ACCESS_KEY_ID     = ${AWS_ACCESS_KEY_ID}"
+   echo -e "\tAWS_SECRET_ACCESS_KEY = ${AWS_SECRET_ACCESS_KEY}"
+   echo -e "\tVAULT_ADDR            = ${VAULT_ADDR}"
+   echo -e "\tVAULT_CACERT          = ${VAULT_CACERT}"
+
 else
 
   HOME=/home/ubuntu
