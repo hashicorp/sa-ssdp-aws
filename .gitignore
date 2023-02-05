@@ -17,3 +17,5 @@ platform/vault-ent-aws/terraform.tfvars
 platform/vault-ent-aws/.terraform/modules/modules.json
 platform/vault-ent-aws/.terraform/providers/registry.terraform.io/hashicorp/aws/4.50.0/linux_amd64/terraform-provider-aws_v4.50.0_x5
 platform/vault-ent-aws/.terraform/providers/registry.terraform.io/hashicorp/tls/4.0.4/linux_amd64/terraform-provider-tls_v4.0.4_x5
+platform/consul-ent-aws/terraform.tfstate.backup
+platform/vault-ent-aws/terraform.tfstate.backup
