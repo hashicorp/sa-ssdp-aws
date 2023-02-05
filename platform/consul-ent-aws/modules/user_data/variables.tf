@@ -29,6 +29,11 @@ variable "consul_dc" {
   default     = "dc1"
 }
 
+variable "consul_ca_token" {
+  type        = string
+  default     = null
+}
+
 variable "vault_version" {
   type        = string
   description = "Vault version"

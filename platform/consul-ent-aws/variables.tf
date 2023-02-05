@@ -16,6 +16,12 @@ variable "consul_version" {
   description = "Consul version"
 }
 
+variable "consul_ca_token" {
+  type        = string
+  default     = null
+  description = "Vault Token for Connect CA Policy"
+}
+
 variable "vault_version" {
   type        = string
   default     = "1.12.2"

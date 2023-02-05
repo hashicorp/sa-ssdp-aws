@@ -17,6 +17,8 @@ module "user_data" {
   resource_name_prefix        = var.resource_name_prefix
   consul_license_secret_path  = var.consul_license_secret_path
   consul_version              = var.consul_version
+  consul_dc                   = var.region
+  consul_ca_token             = var.consul_ca_token
   vault_version               = var.vault_version
   vault_addr                  = var.vault_addr
   vault_ca                    = var.vault_ca
