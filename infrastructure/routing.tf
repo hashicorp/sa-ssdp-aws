@@ -25,19 +25,50 @@ resource "aws_vpc_peering_connection" "vpc_app_microservices_2_vpc_payments" {
 
 # Create Routes For VPC Peering Connections
 
-#FIXME: Finish these routes for each of the three VPC Peerings above
+locals {
+  vpc_platform_services_routes = concat(module.vpc_platform_services.private_route_table_ids,module.vpc_platform_services.public_route_table_ids)
+  vpc_app_microservices_routes = concat(module.vpc_app_microservices.private_route_table_ids,module.vpc_app_microservices.public_route_table_ids)
+  vpc_payments_routes = concat(module.vpc_payments.private_route_table_ids,module.vpc_payments.public_route_table_ids)
+}
 
 resource "aws_route" "vpc_platform_services_2_vpc_app_microservices" {
-  count                     = length(var.eks_dev_route_table_ids)
-  route_table_id            = var.eks_dev_route_table_ids[count.index]
-  destination_cidr_block    = var.ecs_dev_vpc_cidr_block
-  vpc_peering_connection_id = aws_vpc_peering_connection.ecs_dev_to_eks_dev.id
+  count                     = length(local.vpc_platform_services_routes)
+  route_table_id            = local.vpc_platform_services_routes[count.index]
+  destination_cidr_block    = module.vpc_app_microservices.vpc_cidr_block
+  vpc_peering_connection_id = aws_vpc_peering_connection.vpc_platform_services_2_vpc_app_microservices.id
 }
 
 resource "aws_route" "vpc_app_microservices_2_vpc_platform_services" {
-  count                     = length(var.ecs_dev_route_table_ids)
-  route_table_id            = var.ecs_dev_route_table_ids[count.index]
-  destination_cidr_block    = var.eks_dev_vpc_cidr_block
-  vpc_peering_connection_id = aws_vpc_peering_connection.ecs_dev_to_eks_dev.id
+  count                     = length(local.vpc_app_microservices_routes)
+  route_table_id            = local.vpc_app_microservices_routes[count.index]
+  destination_cidr_block    = module.vpc_platform_services.vpc_cidr_block
+  vpc_peering_connection_id = aws_vpc_peering_connection.vpc_platform_services_2_vpc_app_microservices.id
 }
 
+resource "aws_route" "vpc_platform_services_2_vpc_payments" {
+  count                     = length(local.vpc_platform_services_routes)
+  route_table_id            = local.vpc_platform_services_routes[count.index]
+  destination_cidr_block    = module.vpc_payments.vpc_cidr_block
+  vpc_peering_connection_id = aws_vpc_peering_connection.vpc_platform_services_2_vpc_payments.id
+}
+
+resource "aws_route" "vpc_payments_2_vpc_platform_services" {
+  count                     = length(local.vpc_payments_routes)
+  route_table_id            = local.vpc_payments_routes[count.index]
+  destination_cidr_block    = module.vpc_platform_services.vpc_cidr_block
+  vpc_peering_connection_id = aws_vpc_peering_connection.vpc_platform_services_2_vpc_payments.id
+}
+
+resource "aws_route" "vpc_app_microservices_2_vpc_payments" {
+  count                     = length(local.vpc_app_microservices_routes)
+  route_table_id            = local.vpc_app_microservices_routes[count.index]
+  destination_cidr_block    = module.vpc_payments_routes.vpc_cidr_block
+  vpc_peering_connection_id = aws_vpc_peering_connection.vpc_app_microservices_2_vpc_payments.id
+}
+
+resource "aws_route" "vpc_payments_2_vpc_app_microservices" {
+  count                     = length(local.vpc_payments_routes)
+  route_table_id            = local.vpc_payments_routes[count.index]
+  destination_cidr_block    = module.vpc_app_microservices.vpc_cidr_block
+  vpc_peering_connection_id = aws_vpc_peering_connection.vpc_platform_services_2_vpc_app_microservices.id
+}
