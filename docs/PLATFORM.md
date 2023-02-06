@@ -377,13 +377,6 @@ pem_keys                  []
 ```
 
 
-
-**YOU ARE UP TO HERE: NEXT** Create Policies:
-https://developer.hashicorp.com/consul/tutorials/vault-secure/kubernetes-vault-consul-secrets-management#generate-vault-policies
-
-
-
-
 ## Secure Communications - CONSUL
 
 
@@ -441,3 +434,9 @@ vault write auth/aws/role/consul auth_type=iam \
   bound_iam_principal_arn="${AWS_CONSUL_IAM_ROLE_ARN}" \
   policies=consul,admin ttl=30m
 ```
+
+vault write auth/kubernetes/role/consul-eks-partition-init \
+    bound_service_account_names=consul-eks-partition-init \
+    bound_service_account_namespaces=default \
+    policies=consul,connect \
+    ttl=1h
