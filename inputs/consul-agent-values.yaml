@@ -32,6 +32,9 @@ global:
       enabled: true
       consulClientRole: consul-eks-client
       consulCARole: consul-connect-ca
+      ca:
+        secretName: vault-ca
+        secretKey: key
       manageSystemACLsRole: consul-eks-server-acl-init # ???
       adminPartitionsRole: consul-eks-partition-init # ???
 #      agentAnnotations: |
