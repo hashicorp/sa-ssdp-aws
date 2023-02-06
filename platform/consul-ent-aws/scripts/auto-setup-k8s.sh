@@ -21,6 +21,10 @@ else
   echo "Fetching Kubeconfig from EKS..."
   aws eks update-kubeconfig --region us-west-2 --name app_svcs-eks
 
+  # Store Vault LB Cert in kube secret
+  echo "Storing Vault LB CA in kube secret..."
+  kubectl create secret generic vault-ca --from-file=key=$VAULT_CACERT
+
   # Install Vault Agent on EKS
   echo "Installing Vault Agent for EKS..."  
   cat > $HOME/sa-ssdp-aws/inputs/vault-agent-values.yaml << EOF
