@@ -1,6 +1,6 @@
 region                    = "us-west-2"
 
-allowed_inbound_cidrs_lb  = ["10.0.0.0/16"]
+allowed_inbound_cidrs_lb = ["10.0.0.0/16", "10.1.0.0/16", "10.2.0.0/16"]
 vault_license_filepath    = "../../inputs/vault.hclic"
 
 private_subnet_ids      = ["subnet-0378c1d7091510d6f","subnet-070ba21940761bae0","subnet-029bca70aabeeb041"]

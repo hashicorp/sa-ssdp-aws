@@ -5,7 +5,6 @@ resource "tls_private_key" "this" {
 module "key_pair" {
   source = "terraform-aws-modules/key-pair/aws"
   version = "1.0.1"
-#  key_name   = "bastian-${var.env_name}-key"
   key_name   = "bastian-key"
   public_key = tls_private_key.this.public_key_openssh
 }
@@ -13,20 +12,9 @@ module "key_pair" {
 data "template_file" "aws_bastian_init" {
   template = file("${path.module}/templates/bastian-setup.sh")
   vars = {
-#    agent_config = base64decode(var.consul_config_file)
-#    consul_token = var.boostrap_acl_token
-#    ca = base64decode(var.consul_ca_file)
-#    partition = var.env_name
-#    consul_hosts = jsonencode(jsondecode(base64decode(var.consul_config_file))["retry_join"][0])
     consul_version = var.consul_version
-#    consul_version = "1.12.8"
     vault_version = var.vault_version
     sa_release_version = var.sa_release_version 
-#    vault_version = "1.12.2"
-#    kubeconfig = local_sensitive_file.kube_config_prod.content
-#    consul_chart_values = local_sensitive_file.consul_helm_chart.content
-#    vault_token = var.vault_token
-#    vault_addr  = var.vault_cluster_addr
   }
 }
 
