@@ -43,6 +43,7 @@ else
   vault kv put consul/secret/enterpriselicense key="$(cat $HOME/sa-ssdp-aws/inputs/consul.hclic)"
   vault kv put consul/secret/gossip key="$(consul keygen)"
   vault kv put consul/secret/initial_management key=$(cat /proc/sys/kernel/random/uuid)
+  vault kv put consul/secret/partition_token key=$(cat /proc/sys/kernel/random/uuid)
   
   # Enable PKI for Conusl Certs
   echo "Enable PKI and create Root Certificate"

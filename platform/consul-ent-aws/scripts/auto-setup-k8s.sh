@@ -52,4 +52,103 @@ EOF
   
   vault read auth/kubernetes/config
 
+  cat > $HOME/sa-ssdp-aws/inputs/consul-agent-values.yaml  << EOF
+global:
+  enabled: false
+  name: consul-eks
+  datacenter: us-west-2 #\${region}
+  image: "hashicorp/consul-enterprise:1.12.8-ent"
+  imageEnvoy: "envoyproxy/envoy:v1.22.5"
+  enableConsulNamespaces: true
+  adminPartitions:
+    enabled: true
+    name: "us-west-2-eks"
+  acls:
+    manageSystemACLs: true
+    bootstrapToken:
+      secretName: consul/data/secret/initial_management 
+      secretKey: key # bootstrapToken
+    partitionToken: # https://www.consul.io/docs/k8s/deployment-configurations/vault/systems-integration
+      secretName: consul/data/secret/partition_token
+      secretKey: key
+  tls:
+    enabled: true
+    enableAutoEncrypt: true
+    caCert:
+      secretName: pki/cert/ca 
+      secretKey: certificate 
+  gossipEncryption:
+    secretName: consul/data/secret/gossip 
+    secretKey: key 
+#  metrics:
+#    enabled: true
+  secretsBackend:
+    vault:
+      enabled: true
+      consulClientRole: consul-eks-client
+      consulCARole: consul-connect-ca
+      manageSystemACLsRole: consul-eks-server-acl-init # ???
+      adminPartitionsRole: consul-eks-partition-init # ???
+#      agentAnnotations: |
+#        "vault.hashicorp.com/namespace": "admin"
+      connectCA:
+       address: ${VAULT_ADDR}
+       rootPKIPath: /connect-root
+       intermediatePKIPath: /connect-intermediate
+       additionalConfig: |
+        {
+          "connect": [{
+            "ca_config": [{
+              "leaf_cert_ttl": "72h",
+              "intermediate_cert_ttl": "8760h",
+              "rotation_period": "2160h",
+              "namespace": "admin"
+            }]
+          }]
+        }
+
+externalServers:
+  enabled: true
+  hosts: 
+  - "provider=aws tag_key=sa-consul tag_value=server"
+  httpsPort: 443
+  useSystemRoots: true
+  k8sAuthMethodHost: https://F105ECE9E0820C8BC60211EA9F0FE26C.gr7.us-west-2.eks.amazonaws.com # \${k8s_api_endpoint}
+
+server:
+  enabled: false
+
+client:
+  enabled: true
+  join: 
+  - "provider=aws tag_key=sa-consul tag_value=server"
+#  nodeMeta:
+#    terraform-module: "hcp-eks-client"
+
+connectInject:
+  transparentProxy:
+    defaultEnabled: true
+  enabled: true
+  default: true
+#  metrics:
+#    defaultEnableMerging: true
+
+controller:
+  enabled: true
+
+ingressGateways:
+  enabled: true
+  gateways:
+    - name: ingress-gateway
+      service:
+        type: LoadBalancer
+        ports:
+        - port: 80
+
+dns:
+  enabled: true
+  enableRedirection: true
+
+EOF
+
 fi

@@ -26,6 +26,10 @@ output "app_eks_cluster" {
   value = module.eks.cluster_id
 }
 
+output "app_eks_cluster_endpoint" {
+  value = module.eks.cluster_endpoint
+}
+
 output "bastian_platsvcs" {
   value = "ssh -o 'IdentitiesOnly yes' -i '../inputs/bastian-key.pem' ubuntu@${aws_instance.bastian_platsvcs.public_dns}"
 }
