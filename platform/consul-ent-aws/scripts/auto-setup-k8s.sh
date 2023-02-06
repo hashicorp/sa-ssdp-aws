@@ -21,6 +21,10 @@ else
   echo "Fetching Kubeconfig from EKS..."
   aws eks update-kubeconfig --region us-west-2 --name app_svcs-eks
 
+  # Store Vault LB Cert in kube secret
+  echo "Storing Vault LB CA in kube secret..."
+  kubectl create secret generic vault-ca --from-file=key=$VAULT_CACERT
+
   # Install Vault Agent on EKS
   echo "Installing Vault Agent for EKS..."  
   cat > $HOME/sa-ssdp-aws/inputs/vault-agent-values.yaml << EOF
@@ -51,6 +55,29 @@ EOF
     kubernetes_ca_cert="${kubernetes_ca_cert}"
   
   vault read auth/kubernetes/config
+
+  vault write auth/kubernetes/role/consul-eks-partition-init \
+      bound_service_account_names=consul-eks-partition-init \
+      bound_service_account_namespaces=default \
+      policies=consul,connect \
+      ttl=1h
+
+  vault write auth/kubernetes/role/consul-connect-ca \
+    bound_service_account_names=* \
+    bound_service_account_namespaces=default \
+    policies=consul,connect \
+    ttl=1h
+  
+  vault write auth/kubernetes/role/consul-eks-server-acl-init \
+    bound_service_account_names=consul-eks-server-acl-init \
+    bound_service_account_namespaces=default \
+    policies=consul,connect \
+    ttl=1h
+
+  vault write auth/kubernetes/role/consul-eks-client \
+      bound_service_account_names=consul-eks-client \
+      bound_service_account_namespaces=default \
+      policies=consul,connect
 
   cat > $HOME/sa-ssdp-aws/inputs/consul-agent-values.yaml  << EOF
 global:
