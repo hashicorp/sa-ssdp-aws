@@ -62,7 +62,7 @@ resource "aws_route" "vpc_payments_2_vpc_platform_services" {
 resource "aws_route" "vpc_app_microservices_2_vpc_payments" {
   count                     = length(local.vpc_app_microservices_routes)
   route_table_id            = local.vpc_app_microservices_routes[count.index]
-  destination_cidr_block    = module.vpc_payments_routes.vpc_cidr_block
+  destination_cidr_block    = module.vpc_payments.vpc_cidr_block
   vpc_peering_connection_id = aws_vpc_peering_connection.vpc_app_microservices_2_vpc_payments.id
 }
 
@@ -70,5 +70,5 @@ resource "aws_route" "vpc_payments_2_vpc_app_microservices" {
   count                     = length(local.vpc_payments_routes)
   route_table_id            = local.vpc_payments_routes[count.index]
   destination_cidr_block    = module.vpc_app_microservices.vpc_cidr_block
-  vpc_peering_connection_id = aws_vpc_peering_connection.vpc_platform_services_2_vpc_app_microservices.id
+  vpc_peering_connection_id = aws_vpc_peering_connection.vpc_app_microservices_2_vpc_payments.id
 }
