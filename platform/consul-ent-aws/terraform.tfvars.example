@@ -1,8 +1,8 @@
 region                    = "<aws-region>"
 vpc_id                    = "<vpc-id>"
 private_subnet_ids        = ["<subnet-id>","<subnet-id>","<subnet-id>"]
-allowed_inbound_cidrs_lb = ["10.0.0.0/16", "10.1.0.0/16", "10.2.0.0/16"]
-
+allowed_inbound_cidrs_lb  = ["10.0.0.0/16", "10.1.0.0/16", "10.2.0.0/16"]
+consul_ca_token           = "<vault_token_consul_ca>"
 instance_type             = "m5.large"               #default = m5.xlarge
 node_count                = 3                        #default = 5
 vault_ca                  = "../../inputs/vault-ca.pem"

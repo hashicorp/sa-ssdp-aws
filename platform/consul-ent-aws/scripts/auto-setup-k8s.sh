@@ -21,6 +21,10 @@ else
   echo "Fetching Kubeconfig from EKS..."
   aws eks update-kubeconfig --region us-west-2 --name app_svcs-eks
 
+  # Fetch K8s API Endpoint
+  echo "Fetching K8s API Endpoint"
+  export K8S_API_ENDPOINT=$(kubectl config view --raw --minify --flatten -o jsonpath='{.clusters[].cluster.server}':443) && echo "K8S_API_ENDPOINT: ${K8S_API_ENDPOINT}"
+
   # Store Vault LB Cert in kube secret
   echo "Storing Vault LB CA in kube secret..."
   kubectl create secret generic vault-ca --from-file=key=$VAULT_CACERT
@@ -36,6 +40,15 @@ EOF
   helm repo add hashicorp https://helm.releases.hashicorp.com && helm repo update
   helm install vault -f $HOME/sa-ssdp-aws/inputs/vault-agent-values.yaml hashicorp/vault --version "0.23.0" 
   
+#  for i in `aws autoscaling describe-auto-scaling-groups --auto-scaling-group-name sa-consul | grep -i instanceid  | awk '{ print $2}' | cut -d',' -f1| sed -e 's/"//g'`;
+#  do aws ec2 describe-instances --instance-ids $i | grep -i PrivateIpAddress | awk '{ print $2 }' | head -1 | cut -d"," -f1;
+#  done;
+
+#  for i in `aws autoscaling describe-auto-scaling-groups --auto-scaling-group-name sa-consul | grep -i instanceid  | awk '{ print $2}' | cut -d',' -f1| sed -e 's/"//g'`;
+#  do aws ec2 describe-instances --instance-ids $i | grep -i PrivateDnsName | awk '{ print $2 }' | head -1 | cut -d"," -f1;
+#  done;
+
+
   # Enable vault auth for Kubernetes
   echo "Enabling Vault Auth for K8s"
   vault auth enable kubernetes
@@ -56,26 +69,32 @@ EOF
   
   vault read auth/kubernetes/config
 
-  vault write auth/kubernetes/role/consul-eks-partition-init \
-      bound_service_account_names=consul-eks-partition-init \
+  export CONSUL_PARTITION_INIT_ACCOUNT=$(helm template --release-name consul -s templates/partition-init-role.yaml -f $HOME/sa-ssdp-aws/inputs/consul-agent-values.yaml hashicorp/consul | yq r - metadata.name) && echo "CONSUL_PARTITION_INIT_ACCOUNT: $CONSUL_PARTITION_INIT_ACCOUNT"
+
+  vault write auth/kubernetes/role/${CONSUL_PARTITION_INIT_ACCOUNT} \
+      bound_service_account_names=${CONSUL_PARTITION_INIT_ACCOUNT} \
       bound_service_account_namespaces=default \
       policies=consul,connect \
       ttl=1h
 
-  vault write auth/kubernetes/role/consul-connect-ca \
-    bound_service_account_names=* \
-    bound_service_account_namespaces=default \
-    policies=consul,connect \
-    ttl=1h
+#  vault write auth/kubernetes/role/consul-connect-ca \
+#    bound_service_account_names=* \
+#    bound_service_account_namespaces=default \
+#    policies=consul,connect \
+#    ttl=1h
   
-  vault write auth/kubernetes/role/consul-eks-server-acl-init \
-    bound_service_account_names=consul-eks-server-acl-init \
+  export CONSUL_ACL_INIT_ACCOUNT=$(helm template --release-name consul -s templates/server-acl-init-role.yaml -f $HOME/sa-ssdp-aws/inputs/consul-agent-values.yaml hashicorp/consul | yq r - metadata.name) && echo "CONSUL_ACL_INIT_ACCOUNT: $CONSUL_ACL_INIT_ACCOUNT"
+
+  vault write auth/kubernetes/role/${CONSUL_ACL_INIT_ACCOUNT} \
+    bound_service_account_names=${CONSUL_ACL_INIT_ACCOUNT} \
     bound_service_account_namespaces=default \
     policies=consul,connect \
     ttl=1h
 
-  vault write auth/kubernetes/role/consul-eks-client \
-      bound_service_account_names=consul-eks-client \
+  export CONSUL_SERVICE_ACCOUNT=$(helm template --release-name consul -s templates/client-serviceaccount.yaml -f $HOME/sa-ssdp-aws/inputs/consul-agent-values.yaml hashicorp/consul | yq r - metadata.name) && echo "CONSUL_SERVICE_ACCOUNT: $CONSUL_SERVICE_ACCOUNT"
+
+  vault write auth/kubernetes/role/${CONSUL_SERVICE_ACCOUNT} \
+      bound_service_account_names=${CONSUL_SERVICE_ACCOUNT} \
       bound_service_account_namespaces=default \
       policies=consul,connect
 
@@ -112,10 +131,13 @@ global:
   secretsBackend:
     vault:
       enabled: true
-      consulClientRole: consul-eks-client
-      consulCARole: consul-connect-ca
-      manageSystemACLsRole: consul-eks-server-acl-init # ???
-      adminPartitionsRole: consul-eks-partition-init # ???
+      ca:
+        secretName: vault-ca ## KubeSecret for Vault CA
+        secretKey: key
+      consulClientRole: ${CONSUL_SERVICE_ACCOUNT}
+      consulCARole: ${CONSUL_SERVICE_ACCOUNT}
+      manageSystemACLsRole: ${CONSUL_ACL_INIT_ACCOUNT}
+      adminPartitionsRole: ${CONSUL_PARTITION_INIT_ACCOUNT}
 #      agentAnnotations: |
 #        "vault.hashicorp.com/namespace": "admin"
       connectCA:
@@ -140,7 +162,7 @@ externalServers:
   - "provider=aws tag_key=sa-consul tag_value=server"
   httpsPort: 443
   useSystemRoots: true
-  k8sAuthMethodHost: https://F105ECE9E0820C8BC60211EA9F0FE26C.gr7.us-west-2.eks.amazonaws.com # \${k8s_api_endpoint}
+  k8sAuthMethodHost: ${K8S_API_ENDPOINT}
 
 server:
   enabled: false
@@ -177,5 +199,8 @@ dns:
   enableRedirection: true
 
 EOF
+
+# helm install
+#  helm install consul hashicorp/consul --values $HOME/sa-ssdp-aws/inputs/consul-agent-values.yaml --debug --timeout 2m
 
 fi

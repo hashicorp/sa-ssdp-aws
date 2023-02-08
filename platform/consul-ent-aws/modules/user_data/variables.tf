@@ -8,12 +8,6 @@ variable "resource_name_prefix" {
   description = "Resource name prefix used for tagging and naming AWS resources"
 }
 
-variable "user_supplied_userdata_path" {
-  type        = string
-  description = "File path to custom userdata script being supplied by the user"
-  default     = null
-}
-
 variable "consul_license_secret_path" {
   type        = string
   description = "Name of Vault Secret storing Consul license file"
