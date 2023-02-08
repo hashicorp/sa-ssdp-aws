@@ -42,6 +42,7 @@ rm /usr/lib/systemd/system/vault.service
 
 # Create Vault agent config file
 mkdir -p /etc/vault-agent.d/
+
 cat > /etc/vault-agent.d/vault-agent.hcl << EOF
 
 exit_after_auth = true
@@ -107,8 +108,6 @@ template {
 
 EOF
 
-
-EOF
 chown -R vault:vault /etc/vault-agent.d
 
 cat > /etc/systemd/system/vault-agent.service << EOF 
@@ -144,7 +143,7 @@ chown -R consul:consul /opt/consul
 # /opt/consul/tls should be readable by all users of the system
 chmod 0755 /opt/consul/tls
 
-cat > /etc/vault-agent.d/consul-template.ctmpl  << EOF
+cat > /etc/vault-agent.d/consul-template.ctmpl << EOF
 datacenter          = "${consul_dc}"
 server              = true
 bootstrap_expect    = ${bootstrap_expect}
