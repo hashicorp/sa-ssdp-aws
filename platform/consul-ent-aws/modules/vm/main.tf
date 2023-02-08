@@ -107,7 +107,18 @@ resource "aws_security_group_rule" "consul_api_inbound" {
   security_group_id = aws_security_group.consul.id
   type              = "ingress"
   from_port         = 8500
-  to_port           = 8500
+  to_port           = 8501
+  protocol          = "tcp"
+  cidr_blocks       = var.allowed_inbound_cidrs
+}
+
+resource "aws_security_group_rule" "consul_grpc_inbound" {
+  count             = var.allowed_inbound_cidrs != null ? 1 : 0
+  description       = "Allow specified CIDRs to Consul gRPC"
+  security_group_id = aws_security_group.consul.id
+  type              = "ingress"
+  from_port         = 8502
+  to_port           = 8503
   protocol          = "tcp"
   cidr_blocks       = var.allowed_inbound_cidrs
 }

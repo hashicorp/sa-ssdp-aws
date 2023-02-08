@@ -42,8 +42,8 @@ rm /usr/lib/systemd/system/vault.service
 
 # Create Vault agent config file
 mkdir -p /etc/vault-agent.d/
-cat > /etc/vault-agent.d/vault-agent.hcl << EOF
 
+cat > /etc/vault-agent.d/vault-agent.hcl << EOF
 exit_after_auth = true
 pid_file = "./pidfile"
 
@@ -107,8 +107,6 @@ template {
 
 EOF
 
-
-EOF
 chown -R vault:vault /etc/vault-agent.d
 
 cat > /etc/systemd/system/vault-agent.service << EOF 
@@ -129,6 +127,7 @@ LimitNOFILE=65536
 
 [Install]
 WantedBy=multi-user.target
+
 EOF
 
 
@@ -234,7 +233,10 @@ tls {
     verify_server_hostname = true
   }
 }
-
+ports {
+  http = -1
+  https = 8501
+}
 auto_encrypt = {
   allow_tls = true
 }
@@ -242,6 +244,7 @@ auto_encrypt = {
 EOF
 
 rm /lib/systemd/system/consul.service
+
 cat > /lib/systemd/system/consul.service  << EOF
 [Unit]
 Description="HashiCorp Consul - A service mesh solution"
@@ -264,6 +267,7 @@ LimitNOFILE=65536
 
 [Install]
 WantedBy=multi-user.target
+
 EOF
 
 systemctl daemon-reload
