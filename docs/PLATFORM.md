@@ -105,7 +105,7 @@ Exit the shell session with the Vault cluster instance before continuing.
 ### 3. Initialize Vault Cluster
 
 ```sh
-# vault operator init # **STOP** try this: 
+# vault operator init 
 vault operator init -recovery-shares=1 -recovery-threshold=1 -format=json | jq . > ./aws_vault_keys.json
 ```
 
@@ -114,7 +114,6 @@ vault operator init -recovery-shares=1 -recovery-threshold=1 -format=json | jq .
 Export the Vault Token to provide appropriate permissions for following commands:
 
 ```sh
-#export VAULT_TOKEN=<initial_root_token>
 echo "export VAULT_TOKEN=$(cat ./aws_vault_keys.json | jq -r .root_token)" >> ~/.bashrc
 source ~/.bashrc
 ```
@@ -139,8 +138,7 @@ i-0a403b210f7af110a    10.0.102.179:8201    follower    true
 
 NOTE: We are using the auto-unseal capability via AWS KMS, so we do not need to run execute the unseal command: `vault operator unseal`. The cluster will unseal itself - keep running `vault status` until you see `Sealed false` in the output.
 
-
-Vault does not enable dead server cleanup by default. Read more here: https://developer.hashicorp.com/vault/docs/concepts/integrated-storage/autopilot?_ga=2.183861359.832577255.1671558082-1844922285.1658445952#dead-server-cleanup
+*NOTE:* Vault does not enable dead server cleanup by default. Read more here: https://developer.hashicorp.com/vault/docs/concepts/integrated-storage/autopilot?_ga=2.183861359.832577255.1671558082-1844922285.1658445952#dead-server-cleanup
 
 ```sh
 vault operator raft autopilot set-config \
@@ -244,18 +242,7 @@ vault write pki/roles/consul-server \
     allow_subdomains=true \
     allow_bare_domains=true \
     allow_localhost=true \
-    generate_lease=true \
     max_ttl="720h"
-```
-
-//TODO: the following error comes back from `generate_lease`, why? This has been raised with engineering. Awaiting response:
-
-```sh
-WARNING! The following warnings were returned from Vault:
-
-  * it is encouraged to disable generate_lease and rely on PKI's native
-  capabilities when possible; this option can cause Vault-wide issues with
-  large numbers of issued certificates
 ```
 
 ```sh
@@ -440,3 +427,4 @@ vault write auth/kubernetes/role/consul-eks-partition-init \
     bound_service_account_namespaces=default \
     policies=consul,connect \
     ttl=1h
+
