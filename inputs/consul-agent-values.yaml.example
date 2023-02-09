@@ -1,5 +1,4 @@
 global:
-  loglevel: debug
   enabled: false
   name: consul-eks
   datacenter: us-west-2 #${region}
@@ -14,15 +13,17 @@ global:
     bootstrapToken:
       secretName: consul/data/secret/initial_management 
       secretKey: key # bootstrapToken
-#    partitionToken: # https://www.consul.io/docs/k8s/deployment-configurations/vault/systems-integration
-#      secretName: consul/data/secret/partition_token
-#      secretKey: key
+    partitionToken: # https://www.consul.io/docs/k8s/deployment-configurations/vault/systems-integration
+      secretName: consul/data/secret/partition_token
+      secretKey: key
   tls:
     enabled: true
     enableAutoEncrypt: true
     caCert:
       secretName: pki/cert/ca
       secretKey: certificate
+#    verify: false
+#    serverAdditionalDNSSANs: ["ip-10-0-103-182.us-west-2.compute.internal", "ip-10-0-102-95.us-west-2.compute.internal", "ip-10-0-101-81.us-west-2.compute.internal"]
   gossipEncryption:
     secretName: consul/data/secret/gossip 
     secretKey: key 
@@ -34,14 +35,15 @@ global:
       ca:
         secretName: vault-ca ## KubeSecret for Vault CA
         secretKey: key
+      consulServerRole: consul-eks-server
       consulClientRole: consul-eks-client
-      consulCARole: consul-eks-client
+      consulCARole: consul-connect-ca
       manageSystemACLsRole: consul-eks-server-acl-init
       adminPartitionsRole: consul-eks-partition-init
 #      agentAnnotations: |
 #        "vault.hashicorp.com/namespace": "admin"
       connectCA:
-       address: https://sa-vault-lb-d52212cc1feadfaa.elb.us-west-2.amazonaws.com:8200
+       address: https://sa-vault-lb-28a1758cd2254f3f.elb.us-west-2.amazonaws.com:8200
        rootPKIPath: /connect-root
        intermediatePKIPath: /connect-intermediate
        additionalConfig: |
@@ -58,11 +60,11 @@ global:
 
 externalServers:
   enabled: true
-  hosts: ["ip-10-0-103-42.us-west-2.compute.internal"] #["10.0.102.116", "10.0.101.174", "10.0.103.173"]
+  hosts: ["ip-10-0-103-113.us-west-2.compute.internal"]
 #  - "provider=aws tag_key=sa-consul tag_value=server"
 #  httpsPort: 443
-  useSystemRoots: true
-  k8sAuthMethodHost: https://76392B8EDE317296C46C3CA998E84361.sk1.us-west-2.eks.amazonaws.com:443
+  useSystemRoots: false
+  k8sAuthMethodHost: https://ED662AA91ABE3D8C5EB5B95239D6807F.gr7.us-west-2.eks.amazonaws.com:443
 
 server:
   enabled: false
