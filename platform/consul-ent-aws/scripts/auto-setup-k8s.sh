@@ -69,39 +69,38 @@ EOF
   
   vault read auth/kubernetes/config
 
-  export CONSUL_PARTITION_INIT_ACCOUNT=$(helm template --release-name consul -s templates/partition-init-role.yaml -f $HOME/sa-ssdp-aws/inputs/consul-agent-values.yaml hashicorp/consul | yq r - metadata.name) && echo "CONSUL_PARTITION_INIT_ACCOUNT: $CONSUL_PARTITION_INIT_ACCOUNT"
+  export K8S_CONSUL_GLOBAL_NAME="consul-eks"
+  echo "Using K8S_CONSUL_GLOBAL_NAME: ${K8S_CONSUL_GLOBAL_NAME}"
 
-  vault write auth/kubernetes/role/${CONSUL_PARTITION_INIT_ACCOUNT} \
-      bound_service_account_names=${CONSUL_PARTITION_INIT_ACCOUNT} \
+  echo "Creating Vault Roles for K8s Service Accounts..."
+
+  vault write auth/kubernetes/role/${K8S_CONSUL_GLOBAL_NAME}-partition-init \
+      bound_service_account_names=${K8S_CONSUL_GLOBAL_NAME}-partition-init \
       bound_service_account_namespaces=default \
       policies=consul,connect \
       ttl=1h
 
-#  vault write auth/kubernetes/role/consul-connect-ca \
-#    bound_service_account_names=* \
-#    bound_service_account_namespaces=default \
-#    policies=consul,connect \
-#    ttl=1h
+  vault write auth/kubernetes/role/consul-connect-ca \
+    bound_service_account_names=* \
+    bound_service_account_namespaces=default \
+    policies=consul,connect \
+    ttl=1h
   
-  export CONSUL_ACL_INIT_ACCOUNT=$(helm template --release-name consul -s templates/server-acl-init-role.yaml -f $HOME/sa-ssdp-aws/inputs/consul-agent-values.yaml hashicorp/consul | yq r - metadata.name) && echo "CONSUL_ACL_INIT_ACCOUNT: $CONSUL_ACL_INIT_ACCOUNT"
-
-  vault write auth/kubernetes/role/${CONSUL_ACL_INIT_ACCOUNT} \
-    bound_service_account_names=${CONSUL_ACL_INIT_ACCOUNT} \
+  vault write auth/kubernetes/role/${K8S_CONSUL_GLOBAL_NAME}-server-acl-init \
+    bound_service_account_names=${K8S_CONSUL_GLOBAL_NAME}-server-acl-init \
     bound_service_account_namespaces=default \
     policies=consul,connect \
     ttl=1h
 
-  export CONSUL_SERVICE_ACCOUNT=$(helm template --release-name consul -s templates/client-serviceaccount.yaml -f $HOME/sa-ssdp-aws/inputs/consul-agent-values.yaml hashicorp/consul | yq r - metadata.name) && echo "CONSUL_SERVICE_ACCOUNT: $CONSUL_SERVICE_ACCOUNT"
-
-  vault write auth/kubernetes/role/${CONSUL_SERVICE_ACCOUNT} \
-      bound_service_account_names=${CONSUL_SERVICE_ACCOUNT} \
+  vault write auth/kubernetes/role/${K8S_CONSUL_GLOBAL_NAME}-client \
+      bound_service_account_names=${K8S_CONSUL_GLOBAL_NAME}-client \
       bound_service_account_namespaces=default \
       policies=consul,connect
 
   cat > $HOME/sa-ssdp-aws/inputs/consul-agent-values.yaml  << EOF
 global:
   enabled: false
-  name: consul-eks
+  name: ${K8S_CONSUL_GLOBAL_NAME}
   datacenter: us-west-2 #\${region}
   image: "hashicorp/consul-enterprise:1.12.8-ent"
   imageEnvoy: "envoyproxy/envoy:v1.22.5"
@@ -121,8 +120,8 @@ global:
     enabled: true
     enableAutoEncrypt: true
     caCert:
-      secretName: pki/cert/ca 
-      secretKey: certificate 
+      secretName: pki/cert/ca
+      secretKey: certificate
   gossipEncryption:
     secretName: consul/data/secret/gossip 
     secretKey: key 
@@ -134,10 +133,10 @@ global:
       ca:
         secretName: vault-ca ## KubeSecret for Vault CA
         secretKey: key
-      consulClientRole: ${CONSUL_SERVICE_ACCOUNT}
-      consulCARole: ${CONSUL_SERVICE_ACCOUNT}
-      manageSystemACLsRole: ${CONSUL_ACL_INIT_ACCOUNT}
-      adminPartitionsRole: ${CONSUL_PARTITION_INIT_ACCOUNT}
+      consulClientRole: ${K8S_CONSUL_GLOBAL_NAME}-client
+      consulCARole: consul-connect-ca
+      manageSystemACLsRole: ${K8S_CONSUL_GLOBAL_NAME}-server-acl-init
+      adminPartitionsRole: ${K8S_CONSUL_GLOBAL_NAME}-partition-init
 #      agentAnnotations: |
 #        "vault.hashicorp.com/namespace": "admin"
       connectCA:
@@ -158,9 +157,9 @@ global:
 
 externalServers:
   enabled: true
-  hosts: 
-  - "provider=aws tag_key=sa-consul tag_value=server"
-  httpsPort: 443
+  hosts: ["${Server}"]
+#  - "provider=aws tag_key=sa-consul tag_value=server"
+#  httpsPort: 443
   useSystemRoots: true
   k8sAuthMethodHost: ${K8S_API_ENDPOINT}
 
