@@ -97,6 +97,11 @@ EOF
       bound_service_account_namespaces=default \
       policies=consul,connect
 
+  vault write auth/kubernetes/role/${K8S_CONSUL_GLOBAL_NAME}-server \
+      bound_service_account_names=${K8S_CONSUL_GLOBAL_NAME}-server \
+      bound_service_account_namespaces=default \
+      policies=consul,connect
+
   cat > $HOME/sa-ssdp-aws/inputs/consul-agent-values.yaml  << EOF
 global:
   enabled: false
@@ -133,6 +138,7 @@ global:
       ca:
         secretName: vault-ca ## KubeSecret for Vault CA
         secretKey: key
+      consulServerRole: ${K8S_CONSUL_GLOBAL_NAME}-server
       consulClientRole: ${K8S_CONSUL_GLOBAL_NAME}-client
       consulCARole: consul-connect-ca
       manageSystemACLsRole: ${K8S_CONSUL_GLOBAL_NAME}-server-acl-init
@@ -157,10 +163,10 @@ global:
 
 externalServers:
   enabled: true
-  hosts: ["${Server}"]
+  hosts: ["\${Server}"]
 #  - "provider=aws tag_key=sa-consul tag_value=server"
 #  httpsPort: 443
-  useSystemRoots: true
+  useSystemRoots: false
   k8sAuthMethodHost: ${K8S_API_ENDPOINT}
 
 server:
