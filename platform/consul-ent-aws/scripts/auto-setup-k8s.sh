@@ -106,7 +106,7 @@ EOF
 global:
   enabled: false
   name: ${K8S_CONSUL_GLOBAL_NAME}
-  datacenter: us-west-2 #\${region}
+  datacenter: us-west-2
   image: "hashicorp/consul-enterprise:1.12.8-ent"
   imageEnvoy: "envoyproxy/envoy:v1.22.5"
   enableConsulNamespaces: true
@@ -117,8 +117,8 @@ global:
     manageSystemACLs: true
     bootstrapToken:
       secretName: consul/data/secret/initial_management 
-      secretKey: key # bootstrapToken
-    partitionToken: # https://www.consul.io/docs/k8s/deployment-configurations/vault/systems-integration
+      secretKey: key
+    partitionToken:
       secretName: consul/data/secret/partition_token
       secretKey: key
   tls:
@@ -130,8 +130,6 @@ global:
   gossipEncryption:
     secretName: consul/data/secret/gossip 
     secretKey: key 
-#  metrics:
-#    enabled: true
   secretsBackend:
     vault:
       enabled: true
@@ -143,8 +141,6 @@ global:
       consulCARole: consul-connect-ca
       manageSystemACLsRole: ${K8S_CONSUL_GLOBAL_NAME}-server-acl-init
       adminPartitionsRole: ${K8S_CONSUL_GLOBAL_NAME}-partition-init
-#      agentAnnotations: |
-#        "vault.hashicorp.com/namespace": "admin"
       connectCA:
        address: ${VAULT_ADDR}
        rootPKIPath: /connect-root
@@ -163,9 +159,8 @@ global:
 
 externalServers:
   enabled: true
-  hosts: ["\${Server}"]
-#  - "provider=aws tag_key=sa-consul tag_value=server"
-#  httpsPort: 443
+  hosts:
+  - "provider=aws tag_key=sa-consul tag_value=server"
   useSystemRoots: false
   k8sAuthMethodHost: ${K8S_API_ENDPOINT}
 
@@ -176,16 +171,12 @@ client:
   enabled: true
   join: 
   - "provider=aws tag_key=sa-consul tag_value=server"
-#  nodeMeta:
-#    terraform-module: "hcp-eks-client"
 
 connectInject:
   transparentProxy:
     defaultEnabled: true
   enabled: true
   default: true
-#  metrics:
-#    defaultEnableMerging: true
 
 controller:
   enabled: true
