@@ -134,7 +134,7 @@ global:
     vault:
       enabled: true
       ca:
-        secretName: vault-ca ## KubeSecret for Vault CA
+        secretName: vault-ca
         secretKey: key
       consulServerRole: ${K8S_CONSUL_GLOBAL_NAME}-server
       consulClientRole: ${K8S_CONSUL_GLOBAL_NAME}-client
