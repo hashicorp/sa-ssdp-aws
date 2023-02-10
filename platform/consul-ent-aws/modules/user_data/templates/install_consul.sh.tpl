@@ -172,18 +172,18 @@ performance {
 connect {
   enabled = true
   ca_provider = "vault"
-    ca_config {
-        address = "${vault_addr}"
-        token = "${consul_ca_token}"
-        ca_file = "/opt/vault/tls/vault-ca.pem"
-        root_pki_path = "connect_root"
-        intermediate_pki_path = "connect_intermediate"
-        leaf_cert_ttl = "72h"
-        rotation_period = "2160h"
-        intermediate_cert_ttl = "8760h"
-        private_key_type = "rsa"
-        private_key_bits = 2048
-    }
+  ca_config {
+      address = "${vault_addr}"
+      token = "${consul_ca_token}"
+      ca_file = "/opt/vault/tls/vault-ca.pem"
+      root_pki_path = "connect_root"
+      intermediate_pki_path = "connect_intermediate"
+      leaf_cert_ttl = "72h"
+      rotation_period = "2160h"
+      intermediate_cert_ttl = "8760h"
+      private_key_type = "rsa"
+      private_key_bits = 2048
+  }
 }
 
 EOF
