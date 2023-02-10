@@ -209,14 +209,14 @@ cat > /etc/vault-agent.d/consul-ca-template.ctmpl << EOF
 EOF
 
 cat > /etc/vault-agent.d/consul-cert-template.ctmpl << EOF
-{{ with secret "pki/issue/consul" "common_name=$${local_hostname}" "alt_names=consul-server-0.server.${consul_dc}.consul,server.${consul_dc}.consul,localhost" "ip_sans=127.0.0.1" "key_usage=DigitalSignature,KeyEncipherment" "ext_key_usage=ServerAuth,ClientAuth" }}
+{{ with secret "pki/issue/consul" "common_name=$${local_hostname}" "alt_names=consul-server-0.server.${consul_dc}.consul,server.${consul_dc}.consul,localhost" "ip_sans=$${local_ipv4},127.0.0.1" "key_usage=DigitalSignature,KeyEncipherment" "ext_key_usage=ServerAuth,ClientAuth" }}
 {{ .Data.certificate }}
 {{ end }}
 
 EOF
 
 cat > /etc/vault-agent.d/consul-key-template.ctmpl << EOF
-{{ with secret "pki/issue/consul" "common_name=$${local_hostname}" "alt_names=consul-server-0.server.${consul_dc}.consul,server.${consul_dc}.consul,localhost" "ip_sans=127.0.0.1" "key_usage=DigitalSignature,KeyEncipherment" "ext_key_usage=ServerAuth,ClientAuth" }}
+{{ with secret "pki/issue/consul" "common_name=$${local_hostname}" "alt_names=,consul-server-0.server.${consul_dc}.consul,server.${consul_dc}.consul,localhost" "ip_sans=$${local_ipv4},127.0.0.1" "key_usage=DigitalSignature,KeyEncipherment" "ext_key_usage=ServerAuth,ClientAuth" }}
 {{ .Data.private_key }}
 {{ end }}
 
