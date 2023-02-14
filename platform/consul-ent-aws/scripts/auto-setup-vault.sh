@@ -24,7 +24,7 @@ else
   if [ $? = 2 ]   # exit 2 means not initialized
   then
     # Initialize Vault
-    echo "Initializing Vault Cluser..."
+    echo "Initializing Vault Cluster..."
     vault operator init -recovery-shares=1 -recovery-threshold=1 -format=json | jq . > $HOME/sa-ssdp-aws/inputs/aws_vault_keys.json
     echo "Vault keys/token saved to $HOME/sa-ssdp-aws/inputs/aws_vault_keys.json"
   else
