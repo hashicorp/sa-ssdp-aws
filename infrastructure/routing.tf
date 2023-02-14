@@ -3,21 +3,21 @@
 
 resource "aws_vpc_peering_connection" "vpc_platform_services_2_vpc_app_microservices" {
   vpc_id        = module.vpc_platform_services.vpc_id
-  peer_owner_id = module.vpc_platform_services.vpc_owner_id
+  peer_owner_id = module.vpc_app_microservices.vpc_owner_id
   peer_vpc_id   = module.vpc_app_microservices.vpc_id
   auto_accept   = true
 }
 
 resource "aws_vpc_peering_connection" "vpc_platform_services_2_vpc_payments" {
   vpc_id        = module.vpc_platform_services.vpc_id
-  peer_owner_id = module.vpc_platform_services.vpc_owner_id
+  peer_owner_id = module.vpc_payments.vpc_owner_id
   peer_vpc_id   = module.vpc_payments.vpc_id
   auto_accept   = true
 }
 
 resource "aws_vpc_peering_connection" "vpc_app_microservices_2_vpc_payments" {
   vpc_id        = module.vpc_app_microservices.vpc_id
-  peer_owner_id = module.vpc_app_microservices.vpc_owner_id
+  peer_owner_id = module.vpc_payments.vpc_owner_id
   peer_vpc_id   = module.vpc_payments.vpc_id
   auto_accept   = true
 }

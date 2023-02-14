@@ -76,7 +76,8 @@ module "eks" {
   cluster_name             = "${var.env_app_microservices.name}-eks"
   cluster_version          = "1.22"   # https://docs.aws.amazon.com/eks/latest/userguide/kubernetes-versions.html
 #  subnets                  = var.private_subnets
-  subnets                  = module.vpc_app_microservices.public_subnets
+#  subnets                  = module.vpc_app_microservices.public_subnets
+  subnets                  = module.vpc_app_microservices.private_subnets
 #  vpc_id                   = var.vpc_id
   vpc_id                   = module.vpc_app_microservices.vpc_id
   write_kubeconfig         = false
