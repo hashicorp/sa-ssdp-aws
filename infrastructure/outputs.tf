@@ -2,9 +2,9 @@ output "your_ip_addr" {
   value = local.ifconfig_co_json.ip
 }
 
-#output "vpc_platform_services_all" {
-#  value = module.vpc_platform_services.vpc_all
-#}
+# output "vpc_platform_services_all" {
+#   value = module.vpc_platform_services.vpc_all
+# }
 
 output "vpc_platform_services_id" {
   value = module.vpc_platform_services.vpc_id
@@ -12,6 +12,10 @@ output "vpc_platform_services_id" {
 
 output "vpc_platform_services_public_subnets" {
   value = module.vpc_platform_services.public_subnets
+}
+
+output "vpc_platform_services_private_subnets" {
+  value = module.vpc_platform_services.private_subnets
 }
 
 output "vpc_app_microservices_id" {
