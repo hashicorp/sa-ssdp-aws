@@ -3,6 +3,7 @@
 imds_token=$( curl -Ss -H "X-aws-ec2-metadata-token-ttl-seconds: 30" -XPUT 169.254.169.254/latest/api/token )
 instance_id=$( curl -Ss -H "X-aws-ec2-metadata-token: $imds_token" 169.254.169.254/latest/meta-data/instance-id )
 local_ipv4=$( curl -Ss -H "X-aws-ec2-metadata-token: $imds_token" 169.254.169.254/latest/meta-data/local-ipv4 )
+local_hostname=$( curl -Ss -H "X-aws-ec2-metadata-token: $imds_token" 169.254.169.254/latest/meta-data/local-hostname )
 
 # install package
 
@@ -171,18 +172,18 @@ performance {
 connect {
   enabled = true
   ca_provider = "vault"
-    ca_config {
-        address = "${vault_addr}"
-        token = "${consul_ca_token}"
-        ca_file = "/opt/vault/tls/vault-ca.pem"
-        root_pki_path = "connect_root"
-        intermediate_pki_path = "connect_intermediate"
-        leaf_cert_ttl = "72h"
-        rotation_period = "2160h"
-        intermediate_cert_ttl = "8760h"
-        private_key_type = "rsa"
-        private_key_bits = 2048
-    }
+  ca_config {
+      address = "${vault_addr}"
+      token = "${consul_ca_token}"
+      ca_file = "/opt/vault/tls/vault-ca.pem"
+      root_pki_path = "connect-root"
+      intermediate_pki_path = "connect-intermediate"
+      leaf_cert_ttl = "72h"
+      rotation_period = "2160h"
+      intermediate_cert_ttl = "8760h"
+      private_key_type = "rsa"
+      private_key_bits = 2048
+  }
 }
 
 EOF
@@ -208,16 +209,17 @@ cat > /etc/vault-agent.d/consul-ca-template.ctmpl << EOF
 EOF
 
 cat > /etc/vault-agent.d/consul-cert-template.ctmpl << EOF
-{{ with secret "pki/issue/consul" "common_name=consul-server-0.server.${consul_dc}.consul" "alt_names=consul-server-0.server.${consul_dc}.consul,server.${consul_dc}.consul,localhost" "ip_sans=127.0.0.1" "key_usage=DigitalSignature,KeyEncipherment" "ext_key_usage=ServerAuth,ClientAuth" }}
+{{ with secret "pki/issue/consul" "common_name=$${local_hostname}" "alt_names=consul-server-0.server.${consul_dc}.consul,server.${consul_dc}.consul,localhost" "ip_sans=$${local_ipv4},127.0.0.1" "key_usage=DigitalSignature,KeyEncipherment" "ext_key_usage=ServerAuth,ClientAuth" }}
 {{ .Data.certificate }}
 {{ end }}
 
 EOF
 
 cat > /etc/vault-agent.d/consul-key-template.ctmpl << EOF
-{{ with secret "pki/issue/consul" "common_name=consul-server-0.server.${consul_dc}.consul" "alt_names=consul-server-0.server.${consul_dc}.consul,server.${consul_dc}.consul,localhost" "ip_sans=127.0.0.1" "key_usage=DigitalSignature,KeyEncipherment" "ext_key_usage=ServerAuth,ClientAuth" }}
+{{ with secret "pki/issue/consul" "common_name=$${local_hostname}" "alt_names=consul-server-0.server.${consul_dc}.consul,server.${consul_dc}.consul,localhost" "ip_sans=$${local_ipv4},127.0.0.1" "key_usage=DigitalSignature,KeyEncipherment" "ext_key_usage=ServerAuth,ClientAuth" }}
 {{ .Data.private_key }}
 {{ end }}
+
 EOF
 
 cat > /etc/consul.d/tls.hcl << EOF
@@ -236,6 +238,8 @@ tls {
 ports {
   http = -1
   https = 8501
+  grpc = 8502
+#  tls_grpc = 8503
 }
 auto_encrypt = {
   allow_tls = true

@@ -69,40 +69,44 @@ EOF
   
   vault read auth/kubernetes/config
 
-  export CONSUL_PARTITION_INIT_ACCOUNT=$(helm template --release-name consul -s templates/partition-init-role.yaml -f $HOME/sa-ssdp-aws/inputs/consul-agent-values.yaml hashicorp/consul | yq r - metadata.name) && echo "CONSUL_PARTITION_INIT_ACCOUNT: $CONSUL_PARTITION_INIT_ACCOUNT"
+  export K8S_CONSUL_GLOBAL_NAME="consul-eks"
+  echo "Using K8S_CONSUL_GLOBAL_NAME: ${K8S_CONSUL_GLOBAL_NAME}"
 
-  vault write auth/kubernetes/role/${CONSUL_PARTITION_INIT_ACCOUNT} \
-      bound_service_account_names=${CONSUL_PARTITION_INIT_ACCOUNT} \
+  echo "Creating Vault Roles for K8s Service Accounts..."
+
+  vault write auth/kubernetes/role/${K8S_CONSUL_GLOBAL_NAME}-partition-init \
+      bound_service_account_names=${K8S_CONSUL_GLOBAL_NAME}-partition-init \
       bound_service_account_namespaces=default \
       policies=consul,connect \
       ttl=1h
 
-#  vault write auth/kubernetes/role/consul-connect-ca \
-#    bound_service_account_names=* \
-#    bound_service_account_namespaces=default \
-#    policies=consul,connect \
-#    ttl=1h
+  vault write auth/kubernetes/role/consul-connect-ca \
+    bound_service_account_names=* \
+    bound_service_account_namespaces=default \
+    policies=consul,connect \
+    ttl=1h
   
-  export CONSUL_ACL_INIT_ACCOUNT=$(helm template --release-name consul -s templates/server-acl-init-role.yaml -f $HOME/sa-ssdp-aws/inputs/consul-agent-values.yaml hashicorp/consul | yq r - metadata.name) && echo "CONSUL_ACL_INIT_ACCOUNT: $CONSUL_ACL_INIT_ACCOUNT"
-
-  vault write auth/kubernetes/role/${CONSUL_ACL_INIT_ACCOUNT} \
-    bound_service_account_names=${CONSUL_ACL_INIT_ACCOUNT} \
+  vault write auth/kubernetes/role/${K8S_CONSUL_GLOBAL_NAME}-server-acl-init \
+    bound_service_account_names=${K8S_CONSUL_GLOBAL_NAME}-server-acl-init \
     bound_service_account_namespaces=default \
     policies=consul,connect \
     ttl=1h
 
-  export CONSUL_SERVICE_ACCOUNT=$(helm template --release-name consul -s templates/client-serviceaccount.yaml -f $HOME/sa-ssdp-aws/inputs/consul-agent-values.yaml hashicorp/consul | yq r - metadata.name) && echo "CONSUL_SERVICE_ACCOUNT: $CONSUL_SERVICE_ACCOUNT"
+  vault write auth/kubernetes/role/${K8S_CONSUL_GLOBAL_NAME}-client \
+      bound_service_account_names=${K8S_CONSUL_GLOBAL_NAME}-client \
+      bound_service_account_namespaces=default \
+      policies=consul,connect
 
-  vault write auth/kubernetes/role/${CONSUL_SERVICE_ACCOUNT} \
-      bound_service_account_names=${CONSUL_SERVICE_ACCOUNT} \
+  vault write auth/kubernetes/role/${K8S_CONSUL_GLOBAL_NAME}-server \
+      bound_service_account_names=${K8S_CONSUL_GLOBAL_NAME}-server \
       bound_service_account_namespaces=default \
       policies=consul,connect
 
   cat > $HOME/sa-ssdp-aws/inputs/consul-agent-values.yaml  << EOF
 global:
   enabled: false
-  name: consul-eks
-  datacenter: us-west-2 #\${region}
+  name: ${K8S_CONSUL_GLOBAL_NAME}
+  datacenter: us-west-2
   image: "hashicorp/consul-enterprise:1.12.8-ent"
   imageEnvoy: "envoyproxy/envoy:v1.22.5"
   enableConsulNamespaces: true
@@ -113,33 +117,30 @@ global:
     manageSystemACLs: true
     bootstrapToken:
       secretName: consul/data/secret/initial_management 
-      secretKey: key # bootstrapToken
-    partitionToken: # https://www.consul.io/docs/k8s/deployment-configurations/vault/systems-integration
+      secretKey: key
+    partitionToken:
       secretName: consul/data/secret/partition_token
       secretKey: key
   tls:
     enabled: true
     enableAutoEncrypt: true
     caCert:
-      secretName: pki/cert/ca 
-      secretKey: certificate 
+      secretName: pki/cert/ca
+      secretKey: certificate
   gossipEncryption:
     secretName: consul/data/secret/gossip 
     secretKey: key 
-#  metrics:
-#    enabled: true
   secretsBackend:
     vault:
       enabled: true
       ca:
-        secretName: vault-ca ## KubeSecret for Vault CA
+        secretName: vault-ca
         secretKey: key
-      consulClientRole: ${CONSUL_SERVICE_ACCOUNT}
-      consulCARole: ${CONSUL_SERVICE_ACCOUNT}
-      manageSystemACLsRole: ${CONSUL_ACL_INIT_ACCOUNT}
-      adminPartitionsRole: ${CONSUL_PARTITION_INIT_ACCOUNT}
-#      agentAnnotations: |
-#        "vault.hashicorp.com/namespace": "admin"
+      consulServerRole: ${K8S_CONSUL_GLOBAL_NAME}-server
+      consulClientRole: ${K8S_CONSUL_GLOBAL_NAME}-client
+      consulCARole: consul-connect-ca
+      manageSystemACLsRole: ${K8S_CONSUL_GLOBAL_NAME}-server-acl-init
+      adminPartitionsRole: ${K8S_CONSUL_GLOBAL_NAME}-partition-init
       connectCA:
        address: ${VAULT_ADDR}
        rootPKIPath: /connect-root
@@ -158,10 +159,9 @@ global:
 
 externalServers:
   enabled: true
-  hosts: 
+  hosts:
   - "provider=aws tag_key=sa-consul tag_value=server"
-  httpsPort: 443
-  useSystemRoots: true
+  useSystemRoots: false
   k8sAuthMethodHost: ${K8S_API_ENDPOINT}
 
 server:
@@ -171,16 +171,12 @@ client:
   enabled: true
   join: 
   - "provider=aws tag_key=sa-consul tag_value=server"
-#  nodeMeta:
-#    terraform-module: "hcp-eks-client"
 
 connectInject:
   transparentProxy:
     defaultEnabled: true
   enabled: true
   default: true
-#  metrics:
-#    defaultEnableMerging: true
 
 controller:
   enabled: true
