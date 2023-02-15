@@ -197,6 +197,6 @@ dns:
 EOF
 
 # helm install
-#  helm install consul hashicorp/consul --values $HOME/sa-ssdp-aws/inputs/consul-agent-values.yaml --version=0.48.0 --debug --timeout 2m
+helm install consul hashicorp/consul --values $HOME/sa-ssdp-aws/inputs/consul-agent-values.yaml --version=0.49.4 --debug --timeout 2m
 
 fi
