@@ -84,7 +84,7 @@ resource "aws_security_group_rule" "consul_lan_serf_tcp_inbound" {
   description       = "Allow specified CIDRs SSH access to Consul nodes"
   security_group_id = aws_security_group.consul.id
   type              = "ingress"
-  from_port         = 8301
+  from_port         = 8300
   to_port           = 8302
   protocol          = "tcp"
   cidr_blocks       = var.allowed_inbound_cidrs
@@ -95,7 +95,7 @@ resource "aws_security_group_rule" "consul_lan_serf_udp_inbound" {
   description       = "Allow specified CIDRs SSH access to Consul nodes"
   security_group_id = aws_security_group.consul.id
   type              = "ingress"
-  from_port         = 8301
+  from_port         = 8300
   to_port           = 8302
   protocol          = "udp"
   cidr_blocks       = var.allowed_inbound_cidrs
