@@ -152,7 +152,7 @@ data_dir            = "/opt/consul/data"
 advertise_addr      = "$${local_ipv4}"
 client_addr         = "0.0.0.0"
 log_level           = "INFO"
-license_path="/etc/consul.d/consul.hclic"
+license_path        = "/etc/consul.d/consul.hclic"
 
 ui_config {
   enabled = true

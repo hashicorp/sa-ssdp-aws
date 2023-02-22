@@ -18,7 +18,8 @@ module "user_data" {
   consul_license_secret_path  = var.consul_license_secret_path
   consul_version              = var.consul_version
   consul_dc                   = var.region
-  consul_ca_token             = var.consul_ca_token
+  consul_partition            = var.consul_partition
+  gateway_type                = var.gateway_type
   vault_version               = var.vault_version
   vault_addr                  = var.vault_addr
   vault_ca                    = var.vault_ca
@@ -36,5 +37,6 @@ module "vm" {
   userdata_script             = module.user_data.consul_userdata_base64_encoded
   consul_subnets              = var.private_subnet_ids
   vpc_id                      = var.vpc_id
+  gateway_type                = var.gateway_type
 }
 

@@ -147,7 +147,7 @@ resource "aws_security_group_rule" "consul_outbound" {
 }
 
 resource "aws_launch_template" "consul_gw" {
-  name          = "${var.resource_name_prefix}-consul-gw"
+  name          = "${var.resource_name_prefix}-consul-${var.gateway_type}-gw"
   image_id      = var.user_supplied_ami_id != null ? var.user_supplied_ami_id : data.aws_ami.ubuntu[0].id
   instance_type = var.instance_type
   key_name      = var.key_name != null ? var.key_name : null
@@ -179,7 +179,7 @@ resource "aws_launch_template" "consul_gw" {
 }
 
 resource "aws_autoscaling_group" "consul_gw" {
-  name                = "${var.resource_name_prefix}-consul-gw"
+  name                = "${var.resource_name_prefix}-consul-${var.gateway_type}-gw"
   min_size            = var.node_count
   max_size            = var.node_count
   desired_capacity    = var.node_count
@@ -193,13 +193,13 @@ resource "aws_autoscaling_group" "consul_gw" {
 
   tag {
     key                 = "Name"
-    value               = "${var.resource_name_prefix}-consul-gateway"
+    value               = "${var.resource_name_prefix}-consul-${var.gateway_type}-gateway"
     propagate_at_launch = true
   }
 
   tag {
     key                 = "${var.resource_name_prefix}-consul-gw"
-    value               = "gateway"
+    value               = "${var.gateway_type}-gateway"
     propagate_at_launch = true
   }
 
