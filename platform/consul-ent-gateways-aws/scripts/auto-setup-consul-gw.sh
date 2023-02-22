@@ -27,7 +27,8 @@ else
       policies=consul,connect,admin ttl=30m
 
   fi
-  
+
+  echo -e "Creating Consul Admin Partition: Payments...\n"
   vault kv get -field=certificate pki/cert/ca > $HOME/sa-ssdp-aws/inputs/consul-ca.pem 
   SERVER_0=$(aws --output text --query "Reservations[*].Instances[*].PrivateDnsName" ec2 describe-instances --instance-ids `aws --output text --query "AutoScalingGroups[0].Instances[0].InstanceId" autoscaling describe-auto-scaling-groups --auto-scaling-group-names "$(terraform output -state $HOME/sa-ssdp-aws/platform/consul-ent-aws/terraform.tfstate -raw -raw asg_name)"`) \
   CONSUL_HTTP_ADDR=https://${SERVER_0}:8501 \
