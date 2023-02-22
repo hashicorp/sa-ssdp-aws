@@ -3,7 +3,7 @@ resource "local_sensitive_file" "generate_tfvars" {
     region                   = var.region
     instance_subnets         = jsonencode(module.vpc_platform_services.private_subnets.*)
     vpc_platform_services_id = module.vpc_platform_services.vpc_id
-    key_name                 = module.key_pair.key_pair_key_name
+    vpc_cidr_blocks          = jsonencode([module.vpc_platform_services.vpc_cidr_block, module.vpc_app_microservices.vpc_cidr_block, module.vpc_payments.vpc_cidr_block])
     })
   filename          = "../inputs/terraform.tfvars-platform"
 }
