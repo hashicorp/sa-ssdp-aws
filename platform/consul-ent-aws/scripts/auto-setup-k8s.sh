@@ -190,6 +190,10 @@ ingressGateways:
         ports:
         - port: 80
 
+meshGateway:
+  enabled: true
+  replicas: 1
+
 dns:
   enabled: true
   enableRedirection: true

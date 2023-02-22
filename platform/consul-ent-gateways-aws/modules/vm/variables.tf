@@ -1,3 +1,10 @@
+/**
+ * Copyright © 2014-2022 HashiCorp, Inc.
+ *
+ * This Source Code is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of the MPL was not distributed with this project, you can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ */
+
 variable "allowed_inbound_cidrs" {
   type        = list(string)
   description = "List of CIDR blocks to permit inbound traffic from to load balancer"
@@ -6,13 +13,13 @@ variable "allowed_inbound_cidrs" {
 
 variable "allowed_inbound_cidrs_ssh" {
   type        = list(string)
-  description = "List of CIDR blocks to give SSH access to Vault nodes"
+  description = "List of CIDR blocks to give SSH access to Consul nodes"
   default     = null
 }
 
 variable "aws_iam_instance_profile" {
   type        = string
-  description = "IAM instance profile name to use for Vault instances"
+  description = "IAM instance profile name to use for Consul instances"
 }
 
 variable "common_tags" {
@@ -27,15 +34,21 @@ variable "instance_type" {
   default     = "m5.xlarge"
 }
 
+variable "key_name" {
+  type        = string
+  description = "key pair to use for SSH access to instance"
+  default     = null
+}
+
 variable "lb_type" {
   description = "The type of load balancer to provision: network or application."
   type        = string
+  default     = "network"
 }
 
 variable "node_count" {
   type        = number
-  description = "Number of Vault nodes to deploy in ASG"
-  default     = 5
+  description = "Number of Consul nodes to deploy in ASG"
 }
 
 variable "resource_name_prefix" {
@@ -54,20 +67,20 @@ variable "user_supplied_ami_id" {
   default     = null
 }
 
-variable "vault_lb_sg_id" {
-  type        = string
-  description = "Security group ID of Vault load balancer"
-}
-
-variable "vault_subnets" {
+#variable "vault_lb_sg_id" {
+#  type        = string
+#  description = "Security group ID of Consul load balancer"
+#}
+#
+variable "consul_subnets" {
   type        = list(string)
   description = "Private subnets where Vault will be deployed"
 }
-
-variable "vault_target_group_arns" {
-  type        = list(string)
-  description = "Target group ARN(s) to register Vault nodes with"
-}
+#
+#variable "vault_target_group_arns" {
+#  type        = list(string)
+#  description = "Target group ARN(s) to register Vault nodes with"
+#}
 
 variable "vpc_id" {
   type        = string
