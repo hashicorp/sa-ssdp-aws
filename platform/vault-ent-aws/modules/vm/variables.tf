@@ -27,12 +27,6 @@ variable "instance_type" {
   default     = "m5.xlarge"
 }
 
-variable "key_name" {
-  type        = string
-  description = "key pair to use for SSH access to instance"
-  default     = null
-}
-
 variable "lb_type" {
   description = "The type of load balancer to provision: network or application."
   type        = string

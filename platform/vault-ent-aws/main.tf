@@ -82,7 +82,6 @@ module "vm" {
   aws_iam_instance_profile  = module.iam.aws_iam_instance_profile
   common_tags               = var.common_tags
   instance_type             = var.instance_type
-  key_name                  = var.key_name
   lb_type                   = var.lb_type
   node_count                = var.node_count
   resource_name_prefix      = var.resource_name_prefix

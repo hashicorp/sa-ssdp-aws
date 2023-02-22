@@ -34,12 +34,6 @@ variable "instance_type" {
   description = "EC2 instance type"
 }
 
-variable "key_name" {
-  type        = string
-  default     = null
-  description = "(Optional) key pair to use for SSH access to instance"
-}
-
 variable "kms_key_deletion_window" {
   type        = number
   default     = 7
