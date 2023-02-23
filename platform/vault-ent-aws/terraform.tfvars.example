@@ -1,7 +1,7 @@
 region                    = "<aws-region>"
 vpc_id                    = "<vpc-id>"
 private_subnet_ids        = ["<subnet-id>","<subnet-id>","<subnet-id>"]
-allowed_inbound_cidrs_lb  = ["<vpc-cidr-block>", "<vpc-cidr-block>", "<vpc-cidr-block>"]
+allowed_inbound_cidrs     = ["<vpc-cidr-block>", "<vpc-cidr-block>", "<vpc-cidr-block>"]
 
 vault_license_filepath    = "../../inputs/vault.hclic"
 

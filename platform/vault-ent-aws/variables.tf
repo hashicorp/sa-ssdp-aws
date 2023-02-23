@@ -4,7 +4,7 @@ variable "region" {
   default     = "us-west-2"
 }
 
-variable "allowed_inbound_cidrs_lb" {
+variable "allowed_inbound_cidrs" {
   type        = list(string)
   description = "(Optional) List of CIDR blocks to permit inbound traffic from to load balancer"
   default     = null

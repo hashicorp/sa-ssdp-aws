@@ -24,7 +24,7 @@ module "kms" {
 module "loadbalancer" {
   source = "./modules/load_balancer"
 
-  allowed_inbound_cidrs   = var.allowed_inbound_cidrs_lb
+  allowed_inbound_cidrs   = var.allowed_inbound_cidrs
   common_tags             = var.common_tags
   lb_certificate_arn      = module.aws_secrets.lb_certificate_arn
   lb_deregistration_delay = var.lb_deregistration_delay

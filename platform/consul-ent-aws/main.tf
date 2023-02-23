@@ -27,7 +27,7 @@ module "user_data" {
 module "vm" {
   source = "./modules/vm"
 
-  allowed_inbound_cidrs       = var.allowed_inbound_cidrs_lb
+  allowed_inbound_cidrs       = var.allowed_inbound_cidrs
   allowed_inbound_cidrs_ssh   = var.allowed_inbound_cidrs_ssh
   aws_iam_instance_profile    = module.iam.aws_iam_instance_profile
   instance_type               = var.instance_type
