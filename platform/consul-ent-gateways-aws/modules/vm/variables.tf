@@ -86,3 +86,8 @@ variable "vpc_id" {
   type        = string
   description = "VPC ID where Vault will be deployed"
 }
+
+variable "gateway_type" {
+  type        = string
+  description  = "Type of Consul Gateway: mesh, ingress, terminating"
+}

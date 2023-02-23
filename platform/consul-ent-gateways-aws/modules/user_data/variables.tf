@@ -23,9 +23,10 @@ variable "consul_dc" {
   default     = "dc1"
 }
 
-variable "consul_ca_token" {
+variable "consul_partition" {
   type        = string
   default     = null
+  description = "Consul Administrative Partition for which the Consul Gateway serves"
 }
 
 variable "vault_version" {
@@ -48,4 +49,9 @@ variable "vault_addr" {
   type        = string
   default     = null
   description = "Vault Cluster Address"
+}
+
+variable "gateway_type" {
+  type        = string
+  description  = "Type of Consul Gateway: mesh, ingress, terminating"
 }

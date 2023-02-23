@@ -5,12 +5,19 @@ instance_id=$( curl -Ss -H "X-aws-ec2-metadata-token: $imds_token" 169.254.169.2
 local_ipv4=$( curl -Ss -H "X-aws-ec2-metadata-token: $imds_token" 169.254.169.254/latest/meta-data/local-ipv4 )
 local_hostname=$( curl -Ss -H "X-aws-ec2-metadata-token: $imds_token" 169.254.169.254/latest/meta-data/local-hostname )
 
-# install package
+# Add HashiCorp packages
 
 curl -fsSL https://apt.releases.hashicorp.com/gpg | apt-key add -
 apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
+
+# Add envoy packages
+curl -sL 'https://deb.dl.getenvoy.io/public/gpg.8115BA8E629CC074.key' | sudo gpg --dearmor -o /usr/share/keyrings/getenvoy-keyring.gpg
+echo a077cb587a1b622e03aa4bf2f3689de14658a9497a9af2c427bba5f4cc3c4723 /usr/share/keyrings/getenvoy-keyring.gpg | sha256sum --check
+echo "deb [arch=amd64 signed-by=/usr/share/keyrings/getenvoy-keyring.gpg] https://deb.dl.getenvoy.io/public/deb/ubuntu $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/getenvoy.list
+
 apt-get update
-apt-get install -y consul-enterprise=${consul_version}+ent-* vault-enterprise=${vault_version}+ent-* awscli jq unzip
+apt-get install -y consul-enterprise=${consul_version}+ent-* vault-enterprise=${vault_version}+ent-* awscli getenvoy-envoy jq unzip 
+
 
 echo "Configuring system time"
 timedatectl set-timezone UTC
@@ -53,7 +60,7 @@ auto_auth {
         mount_path = "auth/aws"
         config = {
             type = "iam"
-            role = "consul"
+            role = "consul-gw"
         }
     }
 
@@ -71,21 +78,33 @@ vault {
 }
 
 template {
-  source = "/etc/vault-agent.d/consul-template.ctmpl"
+  contents    = "{{ with secret \"consul/data/secret/enterpriselicense\" }}{{ .Data.data.key}}{{ end }}"
+  destination = "/etc/consul.d/consul.hclic"
+  command     = "sudo systemctl restart consul.service"
+}
+
+template {
+  contents    = "{{ with secret "consul/data/secret/initial_management" }}{{ .Data.data.key}}{{ end }}"
+  destination = "/etc/consul.d/consul.token"
+  command     = "sudo systemctl restart consul.service"
+}
+
+template {
+  source      = "/etc/vault-agent.d/consul-template.ctmpl"
   destination = "/etc/consul.d/consul.hcl"
-  command = "sudo systemctl restart consul.service"
+  command     = "sudo systemctl restart consul.service"
 }
 
 template {
-  source = "/etc/vault-agent.d/consul-acl-template.ctmpl"
+  source      = "/etc/vault-agent.d/consul-acl-template.ctmpl"
   destination = "/etc/consul.d/acl.hcl"
-  command = "sudo systemctl restart consul.service"
+  command     = "sudo systemctl restart consul.service"
 }
 
 template {
-  source = "/etc/vault-agent.d/consul-ca-template.ctmpl"
+  source      = "/etc/vault-agent.d/consul-ca-template.ctmpl"
   destination = "/opt/consul/tls/ca-cert.pem"
-  command = "sudo systemctl restart consul.service"
+  command     = "sudo systemctl restart consul.service"
 }
 
 EOF
@@ -126,47 +145,18 @@ chown -R consul:consul /opt/consul
 # /opt/consul/tls should be readable by all users of the system
 chmod 0755 /opt/consul/tls
 
+#//TODO: if [ ${gateway_type} = "mesh"] then
+
 cat > /etc/vault-agent.d/consul-template.ctmpl << EOF
 datacenter          = "${consul_dc}"
-server              = true
-bootstrap_expect    = ${bootstrap_expect}
 data_dir            = "/opt/consul/data"
 advertise_addr      = "$${local_ipv4}"
 client_addr         = "0.0.0.0"
 log_level           = "INFO"
-license_path="/etc/consul.d/consul.hclic"
-
-ui_config {
-  enabled = true
-}
-
+license_path        = "/etc/consul.d/consul.hclic"
+partition           = "${consul_partition}"
 # AWS cloud join
 retry_join          = ["provider=aws tag_key=${name}-consul tag_value=server"]
-# Max connections for the HTTP API
-limits {
-  http_max_conns_per_client = 128
-}
-performance {
-    raft_multiplier = 1
-}
-
-## Service mesh CA configuration
-connect {
-  enabled = true
-  ca_provider = "vault"
-  ca_config {
-      address = "${vault_addr}"
-      token = "${consul_ca_token}"
-      ca_file = "/opt/vault/tls/vault-ca.pem"
-      root_pki_path = "connect-root"
-      intermediate_pki_path = "connect-intermediate"
-      leaf_cert_ttl = "72h"
-      rotation_period = "2160h"
-      intermediate_cert_ttl = "8760h"
-      private_key_type = "rsa"
-      private_key_bits = 2048
-  }
-}
 
 EOF
 
@@ -176,7 +166,7 @@ acl {
   default_policy = "deny"
   enable_token_persistence = true
   tokens {
-    initial_management = "{{ with secret "consul/data/secret/initial_management" }}{{ .Data.data.key}}{{ end }}"
+    agent = "{{ with secret "consul/data/secret/initial_management" }}{{ .Data.data.key}}{{ end }}"
   }
 }
 encrypt="{{ with secret "consul/data/secret/gossip" }}{{ .Data.data.key}}{{ end }}"
@@ -190,26 +180,10 @@ cat > /etc/vault-agent.d/consul-ca-template.ctmpl << EOF
 
 EOF
 
-cat > /etc/vault-agent.d/consul-cert-template.ctmpl << EOF
-{{ with secret "pki/issue/consul" "common_name=$${local_hostname}" "alt_names=consul-server-0.server.${consul_dc}.consul,server.${consul_dc}.consul,localhost" "ip_sans=$${local_ipv4},127.0.0.1" "key_usage=DigitalSignature,KeyEncipherment" "ext_key_usage=ServerAuth,ClientAuth" }}
-{{ .Data.certificate }}
-{{ end }}
-
-EOF
-
-cat > /etc/vault-agent.d/consul-key-template.ctmpl << EOF
-{{ with secret "pki/issue/consul" "common_name=$${local_hostname}" "alt_names=consul-server-0.server.${consul_dc}.consul,server.${consul_dc}.consul,localhost" "ip_sans=$${local_ipv4},127.0.0.1" "key_usage=DigitalSignature,KeyEncipherment" "ext_key_usage=ServerAuth,ClientAuth" }}
-{{ .Data.private_key }}
-{{ end }}
-
-EOF
-
 cat > /etc/consul.d/tls.hcl << EOF
 tls {
   defaults {
     ca_file                 = "/opt/consul/tls/ca-cert.pem"
-    cert_file               = "/opt/consul/tls/server-cert.pem"
-    key_file                = "/opt/consul/tls/server-key.pem"
     verify_outgoing         = true
   }
   internal_rpc {
@@ -219,12 +193,11 @@ tls {
 }
 ports {
   http = -1
-  https = 8501
   grpc = 8502
 #  tls_grpc = 8503
 }
 auto_encrypt = {
-  allow_tls = true
+  tls = true
 }
 
 EOF
@@ -245,7 +218,30 @@ EnvironmentFile=-/etc/consul.d/consul.env
 User=consul
 Group=consul
 ExecStart=/usr/bin/consul agent -config-dir=/etc/consul.d/
-#ExecReload=/bin/kill --signal HUP $MAINPID
+KillMode=process
+KillSignal=SIGTERM
+Restart=on-failure
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target
+
+EOF
+
+cat > /lib/systemd/system/envoy.service  << EOF
+[Unit]
+Description="HashiCorp Consul - A service mesh solution"
+Documentation=https://www.consul.io/
+Requires=network-online.target
+Requires=consul.service
+After=consul.service
+#ConditionFileNotEmpty=/etc/consul.d/consul.hcl
+
+[Service]
+#EnvironmentFile=-/etc/consul.d/consul.env
+User=consul
+Group=consul
+ExecStart=/usr/bin/consul connect envoy -gateway=mesh -partition "${consul_partition}" -register -service "mesh-gateway" -address "$${local_ipv4}:8443" -token-file /etc/consul.d/consul.token -- -l debug
 KillMode=process
 KillSignal=SIGTERM
 Restart=on-failure

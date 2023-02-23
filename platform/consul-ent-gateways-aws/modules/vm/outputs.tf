@@ -7,15 +7,15 @@
 
 output "asg_name" {
   description = "Name of autoscaling group"
-  value       = aws_autoscaling_group.consul.name
+  value       = aws_autoscaling_group.consul_gw.name
 }
 
 output "launch_template_id" {
   description = "ID of launch template for Vault autoscaling group"
-  value       = aws_launch_template.consul.id
+  value       = aws_launch_template.consul_gw.id
 }
 
 output "consul_sg_id" {
   description = "Security group ID of Vault cluster"
-  value       = aws_security_group.consul.id
+  value       = aws_security_group.consul_gw.id
 }
