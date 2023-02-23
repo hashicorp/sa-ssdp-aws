@@ -39,15 +39,6 @@ EOF
   
   helm repo add hashicorp https://helm.releases.hashicorp.com && helm repo update
   helm install vault -f $HOME/sa-ssdp-aws/inputs/vault-agent-values.yaml hashicorp/vault --version "0.23.0" 
-  
-#  for i in `aws autoscaling describe-auto-scaling-groups --auto-scaling-group-name sa-consul | grep -i instanceid  | awk '{ print $2}' | cut -d',' -f1| sed -e 's/"//g'`;
-#  do aws ec2 describe-instances --instance-ids $i | grep -i PrivateIpAddress | awk '{ print $2 }' | head -1 | cut -d"," -f1;
-#  done;
-
-#  for i in `aws autoscaling describe-auto-scaling-groups --auto-scaling-group-name sa-consul | grep -i instanceid  | awk '{ print $2}' | cut -d',' -f1| sed -e 's/"//g'`;
-#  do aws ec2 describe-instances --instance-ids $i | grep -i PrivateDnsName | awk '{ print $2 }' | head -1 | cut -d"," -f1;
-#  done;
-
 
   # Enable vault auth for Kubernetes
   echo "Enabling Vault Auth for K8s"
