@@ -193,6 +193,7 @@ tls {
 }
 ports {
   http = -1
+  https = 8501
   grpc = 8502
 #  tls_grpc = 8503
 }
