@@ -53,3 +53,11 @@ output "bastian_platsvcs" {
 output "bastian_platsvcs_copy_licenses" {
   value = "scp -o 'IdentitiesOnly yes' -i '../inputs/bastian-key.pem' ../inputs/* ubuntu@${aws_instance.bastian_platsvcs.public_dns}:/home/ubuntu/sa-ssdp-aws/inputs/"
 }
+
+output "aws_instance_bastian_platsvcs_id" {
+  value = aws_instance.bastian_platsvcs.id
+}
+
+output "aws_instance_bastian_platsvcs_id_ssm" {
+  value = "aws ssm start-session --target ${aws_instance.bastian_platsvcs.id}"
+}

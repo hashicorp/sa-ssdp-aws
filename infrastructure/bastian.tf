@@ -21,6 +21,7 @@ data "template_file" "aws_bastian_init" {
 resource "aws_instance" "bastian_platsvcs" {
   instance_type               = "t3.small"
   ami                         = data.aws_ami.ubuntu.id
+  iam_instance_profile        = aws_iam_instance_profile.bastian.name
   key_name                    = module.key_pair.key_pair_key_name
   vpc_security_group_ids      = [ aws_security_group.bastian_ingress.id ]
   subnet_id                   = module.vpc_platform_services.public_subnets[0]
@@ -69,5 +70,58 @@ resource "aws_security_group" "bastian_ingress" {
     protocol         = "-1"
     cidr_blocks      = ["0.0.0.0/0"]
     ipv6_cidr_blocks = ["::/0"]
+  }
+}
+
+# creates new instance role profile (noted by name_prefix which forces new resource) for named instance role
+# uses random UUID & suffix
+# see: https://www.terraform.io/docs/providers/aws/r/iam_instance_profile.html
+resource "aws_iam_instance_profile" "bastian" {
+  name_prefix = "${var.resource_name_prefix}-bastian"
+  role        = aws_iam_role.instance_role.name
+}
+
+# creates IAM role for instances using supplied policy from data source below
+resource "aws_iam_role" "instance_role" {
+  name_prefix        = "${var.resource_name_prefix}-bastian"
+  assume_role_policy = data.aws_iam_policy_document.instance_role.json
+}
+
+# defines JSON for instance role base IAM policy
+data "aws_iam_policy_document" "instance_role" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "sts:AssumeRole",
+    ]
+
+    principals {
+      type        = "Service"
+      identifiers = ["ec2.amazonaws.com"]
+    }
+  }
+}
+
+resource "aws_iam_role_policy" "session_manager" {
+  name   = "${var.resource_name_prefix}-bastian-ssm"
+  role   = aws_iam_role.instance_role.id
+  policy = data.aws_iam_policy_document.session_manager.json
+}
+
+data "aws_iam_policy_document" "session_manager" {
+  statement {
+    effect = "Allow"
+
+    actions = [
+      "ssm:UpdateInstanceInformation",
+      "ssmmessages:CreateControlChannel",
+      "ssmmessages:CreateDataChannel",
+      "ssmmessages:OpenControlChannel",
+      "ssmmessages:OpenDataChannel"
+    ]
+
+    resources = [
+      "*",
+    ]
   }
 }

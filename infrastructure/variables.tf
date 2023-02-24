@@ -31,6 +31,12 @@ variable "sa_release_version" {
   default     = "0.1.0"
 }
 
+variable "resource_name_prefix" {
+  type        = string
+  description = "Resource name prefix used for tagging and naming AWS resources"
+  default     = "sa"
+}
+
 
 ## VPC Environments
 
