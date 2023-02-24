@@ -22,13 +22,14 @@ else
   then
     echo -e "Unable to retrieve Consul IAM Role ARN:\n\tAWS_CONSUL_GW_IAM_ROLE_ARN = $AWS_CONSUL_GW_IAM_ROLE_ARN"
   else
+    echo -e "Creating Vault AWS IAM role..."
     vault write auth/aws/role/consul-gw auth_type=iam \
       bound_iam_principal_arn="${AWS_CONSUL_GW_IAM_ROLE_ARN}" \
       policies=consul,connect,admin ttl=30m
 
   fi
 
-  echo -e "Creating Consul Admin Partition: Payments...\n"
+  echo -e "Creating Consul Admin Partition: $CONSUL_PARTITION...\n"
   vault kv get -field=certificate pki/cert/ca > $HOME/sa-ssdp-aws/inputs/consul-ca.pem 
   SERVER_0=$(aws --output text --query "Reservations[*].Instances[*].PrivateDnsName" ec2 describe-instances --instance-ids `aws --output text --query "AutoScalingGroups[0].Instances[0].InstanceId" autoscaling describe-auto-scaling-groups --auto-scaling-group-names "$(terraform output -state $HOME/sa-ssdp-aws/platform/consul-ent-aws/terraform.tfstate -raw -raw asg_name)"`) \
   CONSUL_PARTITION=$(terraform output -state $HOME/sa-ssdp-aws/platform/consul-ent-gateways-aws/terraform.tfstate -raw consul_partition)
