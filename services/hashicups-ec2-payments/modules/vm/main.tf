@@ -146,69 +146,96 @@ resource "aws_security_group_rule" "consul_outbound" {
   cidr_blocks       = ["0.0.0.0/0"]
 }
 
-resource "aws_launch_template" "consul_gw" {
-  name          = "${var.resource_name_prefix}-consul-${var.gateway_type}-gw"
-  image_id      = var.user_supplied_ami_id != null ? var.user_supplied_ami_id : data.aws_ami.ubuntu[0].id
-  instance_type = var.instance_type
-  key_name      = var.key_name != null ? var.key_name : null
-  user_data     = var.userdata_script
-  vpc_security_group_ids = [
-    aws_security_group.consul_gw.id,
-  ]
+resource "aws_instance" "bastian_platsvcs" {
+  instance_type               = "t3.small"
+  ami                         = data.aws_ami.ubuntu.id
+  key_name                    = module.key_pair.key_pair_key_name
+  vpc_security_group_ids      = [ aws_security_group.bastian_ingress.id ]
+  subnet_id                   = module.vpc_platform_services.public_subnets[0]
+  associate_public_ip_address = true
+  user_data                   = data.template_file.aws_bastian_init.rendered
+  tags = {
+    Name = "bastian"
+  }
 
-  block_device_mappings {
-    device_name = "/dev/sda1"
-
-    ebs {
-      volume_type           = "gp3"
-      volume_size           = 100
-      throughput            = 150
-      iops                  = 3000
-      delete_on_termination = true
+  # Ensure cloud-init has finished executing before returning output
+  provisioner "remote-exec" {
+    inline = [
+      "cloud-init status --wait",
+    ]
+    connection {
+      type        = "ssh"
+      user        = "ubuntu"
+      private_key = tls_private_key.this.private_key_pem
+      host        = aws_instance.bastian_platsvcs.public_dns      
     }
   }
 
-  iam_instance_profile {
-    name = var.aws_iam_instance_profile
-  }
-
-  metadata_options {
-    http_endpoint = "enabled"
-    http_tokens   = "required"
-  }
 }
 
-resource "aws_autoscaling_group" "consul_gw" {
-  name                = "${var.resource_name_prefix}-consul-${var.gateway_type}-gw"
-  min_size            = var.node_count
-  max_size            = var.node_count
-  desired_capacity    = var.node_count
-  vpc_zone_identifier = var.consul_subnets
-#  target_group_arns   = var.consul_target_group_arns
-
-  launch_template {
-    id      = aws_launch_template.consul_gw.id
-    version = "$Latest"
-  }
-
-  tag {
-    key                 = "Name"
-    value               = "${var.resource_name_prefix}-consul-${var.gateway_type}-gateway"
-    propagate_at_launch = true
-  }
-
-  tag {
-    key                 = "${var.resource_name_prefix}-consul-gw"
-    value               = "${var.gateway_type}-gateway"
-    propagate_at_launch = true
-  }
-
-  dynamic "tag" {
-    for_each = var.common_tags
-    content {
-      key   = tag.key
-      value = tag.value
-      propagate_at_launch = true
-    }
-  }
-}
+# resource "aws_launch_template" "consul_gw" {
+#   name          = "${var.resource_name_prefix}-consul-${var.gateway_type}-gw"
+#   image_id      = var.user_supplied_ami_id != null ? var.user_supplied_ami_id : data.aws_ami.ubuntu[0].id
+#   instance_type = var.instance_type
+#   key_name      = var.key_name != null ? var.key_name : null
+#   user_data     = var.userdata_script
+#   vpc_security_group_ids = [
+#     aws_security_group.consul_gw.id,
+#   ]
+# 
+#   block_device_mappings {
+#     device_name = "/dev/sda1"
+# 
+#     ebs {
+#       volume_type           = "gp3"
+#       volume_size           = 100
+#       throughput            = 150
+#       iops                  = 3000
+#       delete_on_termination = true
+#     }
+#   }
+# 
+#   iam_instance_profile {
+#     name = var.aws_iam_instance_profile
+#   }
+# 
+#   metadata_options {
+#     http_endpoint = "enabled"
+#     http_tokens   = "required"
+#   }
+# }
+# 
+# resource "aws_autoscaling_group" "consul_gw" {
+#   name                = "${var.resource_name_prefix}-consul-${var.gateway_type}-gw"
+#   min_size            = var.node_count
+#   max_size            = var.node_count
+#   desired_capacity    = var.node_count
+#   vpc_zone_identifier = var.consul_subnets
+# #  target_group_arns   = var.consul_target_group_arns
+# 
+#   launch_template {
+#     id      = aws_launch_template.consul_gw.id
+#     version = "$Latest"
+#   }
+# 
+#   tag {
+#     key                 = "Name"
+#     value               = "${var.resource_name_prefix}-consul-${var.gateway_type}-gateway"
+#     propagate_at_launch = true
+#   }
+# 
+#   tag {
+#     key                 = "${var.resource_name_prefix}-consul-gw"
+#     value               = "${var.gateway_type}-gateway"
+#     propagate_at_launch = true
+#   }
+# 
+#   dynamic "tag" {
+#     for_each = var.common_tags
+#     content {
+#       key   = tag.key
+#       value = tag.value
+#       propagate_at_launch = true
+#     }
+#   }
+# }

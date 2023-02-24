@@ -48,29 +48,3 @@ data "template_file" "aws_bastian_init" {
   }
 }
 
-resource "aws_instance" "bastian_platsvcs" {
-  instance_type               = "t3.small"
-  ami                         = data.aws_ami.ubuntu.id
-  key_name                    = module.key_pair.key_pair_key_name
-  vpc_security_group_ids      = [ aws_security_group.bastian_ingress.id ]
-  subnet_id                   = module.vpc_platform_services.public_subnets[0]
-  associate_public_ip_address = true
-  user_data                   = data.template_file.aws_bastian_init.rendered
-  tags = {
-    Name = "bastian"
-  }
-
-  # Ensure cloud-init has finished executing before returning output
-  provisioner "remote-exec" {
-    inline = [
-      "cloud-init status --wait",
-    ]
-    connection {
-      type        = "ssh"
-      user        = "ubuntu"
-      private_key = tls_private_key.this.private_key_pem
-      host        = aws_instance.bastian_platsvcs.public_dns      
-    }
-  }
-
-}
