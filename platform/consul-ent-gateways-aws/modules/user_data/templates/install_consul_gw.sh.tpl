@@ -84,7 +84,7 @@ template {
 }
 
 template {
-  contents    = "{{ with secret "consul/data/secret/initial_management" }}{{ .Data.data.key}}{{ end }}"
+  contents    = "{{ with secret \"consul/data/secret/initial_management\" }}{{ .Data.data.key}}{{ end }}"
   destination = "/etc/consul.d/consul.token"
   command     = "sudo systemctl restart consul.service"
 }

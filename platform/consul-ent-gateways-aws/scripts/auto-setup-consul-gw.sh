@@ -31,10 +31,11 @@ else
   echo -e "Creating Consul Admin Partition: Payments...\n"
   vault kv get -field=certificate pki/cert/ca > $HOME/sa-ssdp-aws/inputs/consul-ca.pem 
   SERVER_0=$(aws --output text --query "Reservations[*].Instances[*].PrivateDnsName" ec2 describe-instances --instance-ids `aws --output text --query "AutoScalingGroups[0].Instances[0].InstanceId" autoscaling describe-auto-scaling-groups --auto-scaling-group-names "$(terraform output -state $HOME/sa-ssdp-aws/platform/consul-ent-aws/terraform.tfstate -raw -raw asg_name)"`) \
+  CONSUL_PARTITION=$(terraform output -state $HOME/sa-ssdp-aws/platform/consul-ent-gateways-aws/terraform.tfstate -raw consul_partition)
   CONSUL_HTTP_ADDR=https://${SERVER_0}:8501 \
   CONSUL_CACERT=$HOME/sa-ssdp-aws/inputs/consul-ca.pem \
   CONSUL_HTTP_TOKEN=$(vault kv get -field=key consul/secret/initial_management) \
-  consul partition create -name payments
+  consul partition create -name $CONSUL_PARTITION
 
   echo -e "\nConfiguration complete using these:"
   echo "AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}"
