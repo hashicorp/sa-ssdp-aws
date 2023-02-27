@@ -80,7 +80,7 @@ else
     bound_iam_principal_arn=${AWS_VAULT_IAM_ROLE_ARN} \
     policies=vault,consul ttl=30m
 
-  echo "Configuration complete using these:"
+  echo -e "\nConfiguration complete using these:"
   echo "AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}"
   echo "AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}"
   echo "VAULT_ADDR=${VAULT_ADDR}"
