@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #Wait for box
-sleep 30
+sleep 20
 
 #utils
 sudo add-apt-repository ppa:rmescandon/yq -y
@@ -34,19 +34,13 @@ curl "https://s3.amazonaws.com/session-manager-downloads/plugin/latest/ubuntu_64
 sudo dpkg -i session-manager-plugin.deb
 rm session-manager-plugin.deb
 
-#metadata
-# local_ipv4="$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)"
-# public_ipv4="$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4)"
-# instance="$(curl -s http://169.254.169.254/latest/meta-data/instance-id)"
-
 export HOME=/home/ubuntu
 cd $HOME
 git config --global --add safe.directory $HOME/sa-ssdp-aws
 git clone https://github.com/hashicorp/sa-ssdp-aws.git
 cd sa-ssdp-aws
-#git checkout n8-TryingToMakeItWork  
-#git config --global --add safe.directory /home/ubuntu/sa-ssdp-aws
-git checkout ${sa_release_version} #//FIXME: Change to release tag for GA!
+
+git checkout ${sa_release_version}
 sudo chown -R ubuntu:ubuntu $HOME/sa-ssdp-aws
 
 exit 0
