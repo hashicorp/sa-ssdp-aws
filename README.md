@@ -19,8 +19,8 @@ Solution Architecture - Secure Service Delivery Platform - AWS
     - [2. Prepare the Platform Service deployment](#2.-Prepare-the-Platform-Service-deployment)
 - [PLATFORM](#PLATFORM)
   - [1. Prepare for terraform deployment](#1.-Prepare-for-terraform-deployment)
+  - [2. Verify Vault Scale Group](#5.-Verify-Vault-Scale-Group)
   - [](#)
-  - [5. Verify Vault Scale Group](#5.-Verify-Vault-Scale-Group)
 
 
 ## Overview
@@ -55,17 +55,18 @@ If you have an existing environment, or wish to build your own VPCs and EKS clus
 .
 ├── README.md
 ├── docs
+│   ├── INFRASTRUCTURE.md
+│   ├── PLATFORM.md
+│   └── SERVICES.md
 ├── infrastructure
-│   └── modules
-│       ├── vpc
-│       └── eks
 ├── inputs
 ├── platform
 │   ├── consul-ent-aws
+│   ├── consul-ent-gateways-aws
 │   └── vault-ent-aws
 └── services
-    ├── k8s-Microservices
-    └── EC2-DB
+    ├── hashicups-ec2-payments
+    └── hashicups-k8s
 ```
 
 ---
@@ -109,8 +110,21 @@ vault.hclic
 ```
 
 ---
+
 ## INFRASTRUCTURE
 
 You can use terraform to build infrastructure, or use your own infrastructure. Choose one of the two options in this guide before commencing the **PLATFORM** build: [./docs/INFRASTRUCTURE.md](./docs/INFRASTRUCTURE.md)
 
 ---
+
+## PLATFORM
+
+Having deployed the Infrastructure using terraform (above) or collected the appropriate informatino from existing infrastructure (also documented above)You may now commence deployment the **PLATFORM** services: [./docs/PLATFORM.md](./docs/PLATFORM.md)
+
+NOTE: you may use and existing Vault deployment, or create a new Vault Enterprise cluster. Documentation for each method is available.
+
+---
+
+## SERVICES
+
+For demonstration purposes, instructions for deploying the HashiCups demo app are provided in [./docs/SERVICES.md](./docs/SERVICES.md)

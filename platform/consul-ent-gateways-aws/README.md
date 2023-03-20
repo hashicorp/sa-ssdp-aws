@@ -9,6 +9,6 @@ region                   = "<aws-region>"
 vpc_id                   = "<vpc-id>"
 private_subnet_ids       = ["<subnet-id>","<subnet-id>","<subnet-id>"]
 
-gateway_type		         = "<mesh|ingress|terminating>"
+gateway_type             = "<mesh|ingress|terminating>"
 consul_partition         = "<partition_name>"
 ```
