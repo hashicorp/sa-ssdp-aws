@@ -1,0 +1,10 @@
+vault_addr               = "https://<vault_lb_dns_name>:8200"
+vault_ca                 = "../../inputs/vault-ca.pem"
+
+region                   = "<aws-region>"
+vpc_id                   = "<vpc-id>"
+private_subnet_ids       = ["<subnet-id>","<subnet-id>","<subnet-id>"]
+allowed_inbound_cidrs    = ["<vpc-cidr-block>", "<vpc-cidr-block>", "<vpc-cidr-block>"]
+
+gateway_type		         = "<mesh|ingress|terminating>"
+consul_partition         = "<partition_name>"

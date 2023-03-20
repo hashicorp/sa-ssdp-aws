@@ -1,6 +1,0 @@
-[submodule "platforms/accelerator-aws-consul"]
-	path = platforms/accelerator-aws-consul
-	url = https://github.com/hashicorp-services/accelerator-aws-consul.git
-[submodule "platforms/accelerator-aws-vault"]
-	path = platforms/accelerator-aws-vault
-	url = https://github.com/hashicorp-services/accelerator-aws-vault.git
