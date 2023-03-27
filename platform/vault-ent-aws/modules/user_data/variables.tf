@@ -1,3 +1,6 @@
+# Copyright (c) HashiCorp, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
 variable "aws_bucket_vault_license" {
   type        = string
   description = "S3 bucket ID containing Vault license"

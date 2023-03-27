@@ -1,3 +1,6 @@
+# Copyright (c) HashiCorp, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
 resource "local_sensitive_file" "generate_tfvars" {
   content = templatefile("${path.module}/templates/generate-tfvars.tpl", {
     region                   = var.region

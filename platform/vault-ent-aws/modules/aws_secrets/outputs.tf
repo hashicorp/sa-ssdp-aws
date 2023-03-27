@@ -1,3 +1,6 @@
+# Copyright (c) HashiCorp, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
 output "lb_certificate_arn" {
   description = "ARN of ACM cert to use with Vault LB listener"
   value       = aws_acm_certificate.vault.arn

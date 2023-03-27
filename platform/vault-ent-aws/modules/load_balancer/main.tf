@@ -1,3 +1,6 @@
+# Copyright (c) HashiCorp, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
 resource "aws_security_group" "vault_lb" {
   count       = var.lb_type == "application" ? 1 : 0
   description = "Security group for the application load balancer"

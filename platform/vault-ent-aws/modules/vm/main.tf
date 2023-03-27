@@ -1,3 +1,6 @@
+# Copyright (c) HashiCorp, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
 data "aws_ami" "ubuntu" {
   count       = var.user_supplied_ami_id != null ? 0 : 1
   most_recent = true

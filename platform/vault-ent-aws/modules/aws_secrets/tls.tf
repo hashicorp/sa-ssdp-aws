@@ -1,3 +1,6 @@
+# Copyright (c) HashiCorp, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
 # Generate a private key so you can create a CA cert with it.
 resource "tls_private_key" "ca" {
   algorithm = "RSA"

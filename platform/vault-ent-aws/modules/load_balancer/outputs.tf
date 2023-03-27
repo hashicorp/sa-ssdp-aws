@@ -1,3 +1,6 @@
+# Copyright (c) HashiCorp, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
 output "vault_lb_arn" {
   description = "ARN of Vault load balancer"
   value       = aws_lb.vault_lb.arn
