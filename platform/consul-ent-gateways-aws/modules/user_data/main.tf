@@ -1,3 +1,6 @@
+# Copyright (c) HashiCorp, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
 locals {
   consul_user_data = templatefile(
     "${path.module}/templates/install_consul_gw.sh.tpl",

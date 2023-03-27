@@ -1,3 +1,6 @@
+# Copyright (c) HashiCorp, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
 resource "aws_kms_key" "vault" {
   count                   = var.user_supplied_kms_key_arn != null ? 0 : 1
   deletion_window_in_days = var.kms_key_deletion_window

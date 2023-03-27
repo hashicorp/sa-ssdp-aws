@@ -1,3 +1,6 @@
+# Copyright (c) HashiCorp, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
 
 output "asg_name" {
   description = "Name of the AWS Auto-Scale Group serving the Consul Cluster"

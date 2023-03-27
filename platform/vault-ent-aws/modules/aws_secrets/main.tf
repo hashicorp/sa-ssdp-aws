@@ -1,3 +1,6 @@
+# Copyright (c) HashiCorp, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
 resource "aws_secretsmanager_secret" "tls" {
   name                    = "${var.resource_name_prefix}-tls-secret"
   description             = "contains TLS certs and private keys"

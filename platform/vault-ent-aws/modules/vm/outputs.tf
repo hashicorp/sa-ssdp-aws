@@ -1,3 +1,6 @@
+# Copyright (c) HashiCorp, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
 output "asg_name" {
   description = "Name of autoscaling group"
   value       = aws_autoscaling_group.vault.name

@@ -1,3 +1,6 @@
+# Copyright (c) HashiCorp, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
 variable "aws_bucket_vault_license_arn" {
   type        = string
   description = "ARN of S3 bucket with Vault license"
