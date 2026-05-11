@@ -1,3 +1,5 @@
+# Copyright IBM Corp. 2022, 2026
+
 resource "local_sensitive_file" "generate_tfvars" {
   content = templatefile("${path.module}/templates/generate-tfvars.tpl", {
     region                   = var.region

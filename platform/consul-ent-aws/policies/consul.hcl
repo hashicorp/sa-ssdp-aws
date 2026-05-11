@@ -1,3 +1,5 @@
+# Copyright IBM Corp. 2022, 2026
+
 path "consul/data/secret/gossip"
 {
   capabilities = ["read"]

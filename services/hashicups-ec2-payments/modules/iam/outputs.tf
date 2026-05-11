@@ -1,3 +1,5 @@
+# Copyright IBM Corp. 2022, 2026
+
 output "aws_consul_iam_role_arn" {
   value = aws_iam_role.instance_role[0].arn
 }

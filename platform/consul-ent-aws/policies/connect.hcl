@@ -1,3 +1,5 @@
+# Copyright IBM Corp. 2022, 2026
+
 path "connect-root/*"
 {
   capabilities = ["create", "read", "update", "delete", "list", "sudo"]

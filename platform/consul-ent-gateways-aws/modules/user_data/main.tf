@@ -1,3 +1,5 @@
+# Copyright IBM Corp. 2022, 2026
+
 locals {
   consul_user_data = templatefile(
     "${path.module}/templates/install_consul_gw.sh.tpl",

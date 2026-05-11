@@ -1,3 +1,5 @@
+# Copyright IBM Corp. 2022, 2026
+
 
 output "asg_name" {
   description = "Name of the AWS Auto-Scale Group serving the Consul Cluster"

@@ -1,3 +1,5 @@
+# Copyright IBM Corp. 2022, 2026
+
 # Generate a private key so you can create a CA cert with it.
 resource "tls_private_key" "ca" {
   algorithm = "RSA"

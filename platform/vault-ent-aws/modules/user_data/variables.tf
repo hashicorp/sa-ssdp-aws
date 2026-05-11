@@ -1,3 +1,5 @@
+# Copyright IBM Corp. 2022, 2026
+
 variable "aws_bucket_vault_license" {
   type        = string
   description = "S3 bucket ID containing Vault license"

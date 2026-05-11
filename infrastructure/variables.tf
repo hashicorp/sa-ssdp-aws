@@ -1,3 +1,5 @@
+# Copyright IBM Corp. 2022, 2026
+
 # GLOBAL Options
 
 variable "region" {

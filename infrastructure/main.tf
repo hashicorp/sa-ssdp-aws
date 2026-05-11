@@ -1,3 +1,5 @@
+# Copyright IBM Corp. 2022, 2026
+
 # Util
 
 resource "random_string" "rand_suffix" {

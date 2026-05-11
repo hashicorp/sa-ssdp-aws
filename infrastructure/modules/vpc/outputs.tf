@@ -1,3 +1,5 @@
+# Copyright IBM Corp. 2022, 2026
+
 output "vpc_all" {
   value = module.vpc
 }

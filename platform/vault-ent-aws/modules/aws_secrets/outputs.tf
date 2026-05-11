@@ -1,3 +1,5 @@
+# Copyright IBM Corp. 2022, 2026
+
 output "lb_certificate_arn" {
   description = "ARN of ACM cert to use with Vault LB listener"
   value       = aws_acm_certificate.vault.arn

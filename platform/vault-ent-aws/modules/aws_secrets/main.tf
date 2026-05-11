@@ -1,3 +1,5 @@
+# Copyright IBM Corp. 2022, 2026
+
 resource "aws_secretsmanager_secret" "tls" {
   name                    = "${var.resource_name_prefix}-tls-secret"
   description             = "contains TLS certs and private keys"

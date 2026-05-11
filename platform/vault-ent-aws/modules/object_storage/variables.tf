@@ -1,3 +1,5 @@
+# Copyright IBM Corp. 2022, 2026
+
 variable "common_tags" {
   type        = map(string)
   description = "(Optional) Map of common tags for all taggable AWS resources."

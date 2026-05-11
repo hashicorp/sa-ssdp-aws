@@ -1,3 +1,5 @@
+# Copyright IBM Corp. 2022, 2026
+
 variable "region" {
   description = "Default AWS Region to deploy in."
   type        = string
