@@ -1,3 +1,5 @@
+# Copyright IBM Corp. 2022, 2026
+
 resource "aws_iam_instance_profile" "vault" {
   name_prefix = "${var.resource_name_prefix}-vault"
   role        = var.user_supplied_iam_role_name != null ? var.user_supplied_iam_role_name : aws_iam_role.instance_role[0].name

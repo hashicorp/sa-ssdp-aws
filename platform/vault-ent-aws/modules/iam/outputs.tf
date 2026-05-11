@@ -1,3 +1,5 @@
+# Copyright IBM Corp. 2022, 2026
+
 output "aws_iam_instance_profile" {
   value = aws_iam_instance_profile.vault.name
 }

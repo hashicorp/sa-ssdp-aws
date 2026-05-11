@@ -1,3 +1,5 @@
+# Copyright IBM Corp. 2022, 2026
+
 output "vault_lb_arn" {
   description = "ARN of Vault load balancer"
   value       = aws_lb.vault_lb.arn

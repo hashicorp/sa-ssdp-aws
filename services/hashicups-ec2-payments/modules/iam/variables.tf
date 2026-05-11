@@ -1,3 +1,5 @@
+# Copyright IBM Corp. 2022, 2026
+
 variable "resource_name_prefix" {
   type        = string
   description = "Resource name prefix used for tagging and naming AWS resources"

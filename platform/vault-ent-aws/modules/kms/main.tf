@@ -1,3 +1,5 @@
+# Copyright IBM Corp. 2022, 2026
+
 resource "aws_kms_key" "vault" {
   count                   = var.user_supplied_kms_key_arn != null ? 0 : 1
   deletion_window_in_days = var.kms_key_deletion_window

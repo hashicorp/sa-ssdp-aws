@@ -1,3 +1,5 @@
+# Copyright IBM Corp. 2022, 2026
+
 resource "aws_security_group" "vault_lb" {
   count       = var.lb_type == "application" ? 1 : 0
   description = "Security group for the application load balancer"

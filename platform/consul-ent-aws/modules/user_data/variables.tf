@@ -1,3 +1,5 @@
+# Copyright IBM Corp. 2022, 2026
+
 variable "aws_region" {
   type        = string
   description = "AWS region where Vault is being deployed"

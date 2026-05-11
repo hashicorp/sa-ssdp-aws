@@ -1,3 +1,5 @@
+# Copyright IBM Corp. 2022, 2026
+
 variable "aws_bucket_vault_license_arn" {
   type        = string
   description = "ARN of S3 bucket with Vault license"

@@ -1,3 +1,5 @@
+# Copyright IBM Corp. 2022, 2026
+
 variable "allowed_inbound_cidrs" {
   type        = list(string)
   description = "List of CIDR blocks to permit inbound traffic from to load balancer"

@@ -1,3 +1,5 @@
+# Copyright IBM Corp. 2022, 2026
+
 output "s3_bucket_vault_license_arn" {
   value = aws_s3_bucket.vault_license_bucket.arn
 }

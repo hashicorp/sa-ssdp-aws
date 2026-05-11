@@ -1,3 +1,5 @@
+# Copyright IBM Corp. 2022, 2026
+
 output "your_ip_addr" {
   value = local.ifconfig_co_json.ip
 }

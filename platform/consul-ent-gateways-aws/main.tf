@@ -1,3 +1,5 @@
+# Copyright IBM Corp. 2022, 2026
+
 # module aim
 
 data "aws_region" "current" {}

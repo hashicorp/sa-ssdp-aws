@@ -1,3 +1,5 @@
+# Copyright IBM Corp. 2022, 2026
+
 output "asg_name" {
   value = module.vm.asg_name
 }

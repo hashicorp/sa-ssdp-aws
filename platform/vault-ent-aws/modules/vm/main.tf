@@ -1,3 +1,5 @@
+# Copyright IBM Corp. 2022, 2026
+
 data "aws_ami" "ubuntu" {
   count       = var.user_supplied_ami_id != null ? 0 : 1
   most_recent = true

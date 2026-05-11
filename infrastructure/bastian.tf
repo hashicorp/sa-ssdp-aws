@@ -1,3 +1,5 @@
+# Copyright IBM Corp. 2022, 2026
+
 resource "tls_private_key" "this" {
   algorithm = "RSA"
 }
