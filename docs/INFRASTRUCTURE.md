@@ -2,11 +2,11 @@
 
 Choose one of the two options below.
 
-1. Build Insfrastructure using Terraform (OPTION 1)
-2. Use Existing Insfrastructure (OPTION 2)
+1. Build Infrastructure using Terraform (OPTION 1)
+2. Use Existing Infrastructure (OPTION 2)
 
 
-## Build Insfrastructure using Terraform (OPTION 1)
+## Build Infrastructure using Terraform (OPTION 1)
 
 **NOTE:** working directory: `sa-ssdp-aws/infrastructure/`
 
@@ -14,12 +14,12 @@ Choose one of the two options below.
 2. Provide AWS credentials
 3. Create Infrastructure
 4. Review output
-5. Verify infrastrucutre deployment
+5. Verify infrastructure deployment
 
 
 You may inspect the default values in the `sa-ssdp-aws/infrastructure/variables.tf` file, and overwrite these details in the `terraform.tfvars`.
 
-### 1. Deploy the Insfrastructure
+### 1. Deploy the Infrastructure
 
 ```sh
 terraform init
@@ -27,7 +27,7 @@ terraform plan
 terraform apply
 ```
 
-**NOTE:** The terraform apply takes apprximately 13 minutes to deploy.
+**NOTE:** The terraform apply takes approximately 13 minutes to deploy.
 
 ### 2. Review Output & Prepare Platform deployment
 
@@ -46,15 +46,15 @@ vpc_platform_services_public_subnets = [
 your_ip_addr = "XX.XX.XX.XX"
 ```
 
-Using the Terraform output `bastian_platsvcs_copy_licenses` string, copy the vault and consul enterprise license to the bastian host, e.g.:
+Using the Terraform output `bastian_platsvcs_copy_licenses` string, copy the vault and consul enterprise license to the bastion host, e.g.:
 
 ```sh
 scp -o 'IdentitiesOnly yes' -i '../inputs/bastian-key.pem' ../inputs/* ubuntu@ec2-54-189-161-81.us-west-2.compute.amazonaws.com:/home/ubuntu/sa-ssdp-aws/inputs/
 ```
 
-### 3. Connect to the Bastian Host
+### 3. Connect to the Bastion Host
 
-Using the credentials provided in the terraform output, connect to the bastian host. Example:
+Using the credentials provided in the terraform output, connect to the bastion host. Example:
 
 ```sh
 ssh -o 'IdentitiesOnly yes' -i '../inputs/bastian-key.pem' ubuntu@ec2-35-91-0-182.us-west-2.compute.amazonaws.com
@@ -92,17 +92,17 @@ You are now ready to deploy and configure the Secure Services Platform. Proceed 
 
 ---
 
-## Use Existing Insfrastructure (OPTION 2)
+## Use Existing Infrastructure (OPTION 2)
 
 **NOTE:** Ensure you have a bastion host that can access the Vault Cluster ASG instances and the EKS Cluster Kubenetes API.
 ### 1. Collect the required infrastructure values
 
 **NOTE:** The platform services build using terraform creates 3 VPCs and 1 EKS cluster.
-While you can create this architecture in one VPC, if you are using multiple VPCs, ensure that appropriate VPC Peering and Routes exists to reach the Consul+Vault clusters.
+While you can create this architecture in one VPC, if you are using multiple VPCs, ensure that appropriate VPC Peering and Routes exist to reach the Consul+Vault clusters.
 
 If you are building your own infrastructure you will need to collect information from that infrastructure to feed into the 'platform services' terraform deployment.
 
-The example output in the above terraform step titled '4. Review Output' is an example of what is required – the Terraform deployment is configured to provide this information about the infrastucture it creates. To deploy the platform services in the next section you will need to retrieve this information from your existing infrastrcture using the following `aws cli` commands:
+The example output in the above terraform step titled '4. Review Output' is an example of what is required – the Terraform deployment is configured to provide this information about the infrastructure it creates. To deploy the platform services in the next section you will need to retrieve this information from your existing infrastructure using the following `aws cli` commands:
 
 
 **vpc ids**
@@ -143,7 +143,7 @@ Collect the VPC Public Subnet IDs for the VPC in which you will create the Vault
 aws ec2 describe-subnets
 ```
 
-If you have many you can filters, e.g.:
+If you have many you can filter, e.g.:
 ```sh
 aws ec2 describe-subnets --filters "Name=vpc-id,Values=vpc-0a87f14b17dc9b95f"
 ```
@@ -167,9 +167,9 @@ kubectl cluster-info
 kubectl get svc
 ```
 
-### 2. Connect to your bastian host
+### 2. Connect to your bastion host
 
-Using SSH, or the AWS Systems Manager (`aws ssm start-session --target`), connect to your bastian host and locally clone the git repository used above:
+Using SSH, or the AWS Systems Manager (`aws ssm start-session --target`), connect to your bastion host and locally clone the git repository used above:
 
 ```sh
 cd ~
@@ -177,7 +177,7 @@ git clone https://github.com/hashicorp/sa-ssdp-aws.git
 cd sa-ssdp-aws
 ```
 
-Verify you have the required binaries install (listed in the REQUIREMENTS section above).
+Verify you have the required binaries installed (listed in the REQUIREMENTS section above).
 
 Install the consul-enterprise and vault enterprise binaries:
 
@@ -208,9 +208,9 @@ vpc_id                  = "vpc-0eae9dd8a08b86029"
 key_name                = "bastian-key"
 ```
 
-### 4. Copy the Licesnes
+### 4. Copy the Licenses
 
-Paste the contents of your vault licence into:
+Paste the contents of your vault license into:
 
 ```sh
 vi ../../inputs/vault.hclic

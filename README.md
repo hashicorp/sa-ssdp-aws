@@ -1,20 +1,20 @@
 # sa-ssdp-aws
 Solution Architecture - Secure Service Delivery Platform - AWS
 
-- [Overiew](#Overview)
+- [Overview](#Overview)
   - [Infrastructure (Choose 1)](#Infrastructure (Choose 1))
     - [1. Build with Terraform](#1.-Build-with-Terraform)
     - [2. Use existing Infrastructure](#2.-Use-existing-Infrastructure)
   - [Structure of this repo](#Structure-of-this-repo)
 - [PREPARATION](#PREPARATION)
   - [1. Clone this repo](#1.-Clone-this-repo)
-  - [2. Export AWS credentions](#2.-Export-AWS-credentions)
+  - [2. Export AWS credentials](#2.-Export-AWS-credentials)
 - [INFRASTRUCTURE](#INFRASTRUCTURE)
-  - [Build Insfrastructure using Terraform (OPTION 1)](#Build-Insfrastructure-using-Terraform (OPTION 1))
-    - [1. Deploy the Insfrastructure](3.-Deploy-the-Insfrastructure)
+  - [Build Infrastructure using Terraform (OPTION 1)](#Build-Infrastructure-using-Terraform (OPTION 1))
+    - [1. Deploy the Infrastructure](3.-Deploy-the-Infrastructure)
     - [2. Review Output & Prepare Platform deployment](#4.-Review-Output-&-Prepare-Platform-deployment)
     - [3. Create kubeconfig file](#3.-Create-kubeconfig-file)
-  - [Use Existing Insfrastructure (OPTION 2)](#Use-Existing-Insfrastructure (OPTION 2))
+  - [Use Existing Infrastructure (OPTION 2)](#Use-Existing-Infrastructure (OPTION 2))
     - [1. Collect the required infrastructure values](#1.-Collect-the-required-infrastructure-values)
     - [2. Prepare the Platform Service deployment](#2.-Prepare-the-Platform-Service-deployment)
 - [PLATFORM](#PLATFORM)
@@ -39,16 +39,16 @@ You will need to choose one of the following options:
 
 #### 1. Build with Terraform
 
-The `sa-ssdp-aws/infrastucture/` directory of this reposiory contains terraform infrastructure definitions to build out AWS resource for hosting the Secure Service Delivery Platform deployment. Once you've completed the [REQUIREMENTS](#REQUIREMENTS) section below you are ready to execute the `terraform apply` within the `infrastructure/` directory.
+The `sa-ssdp-aws/infrastructure/` directory of this repository contains terraform infrastructure definitions to build out AWS resource for hosting the Secure Service Delivery Platform deployment. Once you've completed the [REQUIREMENTS](#REQUIREMENTS) section below you are ready to execute the `terraform apply` within the `infrastructure/` directory.
 
-The terraform apply takes apprximately 13 minutes to deploy.
+The terraform apply takes approximately 13 minutes to deploy.
 
 
 #### 2. Use existing Infrastructure
 
-If you have an existing environment, or wish to build your own VPCs and EKS clusters, you may skip the terraform infrastrucure build. You will require certain inputs to deploy the platform services in `./platform/`. The commands to extract this information from AWS can be found below in XXXX.
+If you have an existing environment, or wish to build your own VPCs and EKS clusters, you may skip the terraform infrastructure build. You will require certain inputs to deploy the platform services in `./platform/`. The commands to extract this information from AWS can be found below in XXXX.
 
-*NOTE:*  Following best practices, our Vault Cluster will not be available externally, over the internall. Hene, you will need a Bastian host that can access the Vault and Consul ASGs and the EKS kubectl API, as done in the Terraform infrastructure (Option 1).
+*NOTE:*  Following best practices, our Vault Cluster will not be available externally, over the internet. Hence, you will need a bastion host that can access the Vault and Consul ASGs and the EKS kubectl API, as done in the Terraform infrastructure (Option 1).
 
 ### Structure of this repo
 ```sh
@@ -89,7 +89,7 @@ Clone this repo:
 git clone https://github.com/hashicorp/sa-ssdp-aws.git
 ```
 
-#### 2. Export AWS credentions
+#### 2. Export AWS credentials
 
 Just like the AWS CLI tool, the Terraform Provider for AWS *requires* both the `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`. Export these values, e.g.:
 
@@ -98,9 +98,9 @@ export AWS_ACCESS_KEY_ID=<aws_access_key_id>
 export AWS_SECRET_ACCESS_KEY=<aws_secret_access_key>
 ```
 
-#### 3. Generate Enterprise Licences
+#### 3. Generate Enterprise Licenses
 
-You require Enterprise Licesnes for both Vault and Consul. Save them somewhere locally, e.g.:
+You require Enterprise Licenses for both Vault and Consul. Save them somewhere locally, e.g.:
 
 ```sh
 ls -l1 ./sa-ssdp-aws/inputs
@@ -119,9 +119,9 @@ You can use terraform to build infrastructure, or use your own infrastructure. C
 
 ## PLATFORM
 
-Having deployed the Infrastructure using terraform (above) or collected the appropriate informatino from existing infrastructure (also documented above)You may now commence deployment the **PLATFORM** services: [./docs/PLATFORM.md](./docs/PLATFORM.md)
+Having deployed the Infrastructure using terraform (above) or collected the appropriate information from existing infrastructure (also documented above). You may now commence deployment the **PLATFORM** services: [./docs/PLATFORM.md](./docs/PLATFORM.md)
 
-NOTE: you may use and existing Vault deployment, or create a new Vault Enterprise cluster. Documentation for each method is available.
+NOTE: you may use an existing Vault deployment, or create a new Vault Enterprise cluster. Documentation for each method is available.
 
 ---
 
