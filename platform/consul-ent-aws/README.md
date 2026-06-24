@@ -8,7 +8,7 @@ To support a secure, production-grade deployment, this module requires a Vault C
 * Consul Connect (sidecar) Certificate Management
 * Consul Secrets Management for Consul Servers, Consul K8s agents, and Consul agents
 
-This module was developed and test with (sa-ssdp-aws-tf-vault-ent)[https://github.com/hashicorp/sa-ssdp-aws-tf-vault-ent]
+This module was developed and tested with [sa-ssdp-aws-tf-vault-ent](https://github.com/hashicorp/sa-ssdp-aws-tf-vault-ent)
 
 Configuration of the Vault Cluster requires various authentication providers, roles, and policies:
 

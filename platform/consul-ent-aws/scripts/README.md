@@ -3,7 +3,7 @@
 The following scripts automate the many commands required to configure Vault Ent to support Consul Ent.
 
 * `auto-setup-vault.sh` - Configure Vault with the secrets required for secure Consul operation
-* `auto-setup-consul.sh` - Confgure Vault roles and policies for Consul IAM authentication
+* `auto-setup-consul.sh` - Configure Vault roles and policies for Consul IAM authentication
 
 ## `auto-setup-vault.sh` - Requirements
 
@@ -19,7 +19,7 @@ AWS_VAULT_IAM_ROLE_ARN=<aws_vault_iam_role_arn>
 
 ## `auto-setup-consul.sh` - Requirements
 
-Run this AFTER you have created your Consul cluster - it required the IAM Role ARN output from the cluster creation.
+Run this AFTER you have created your Consul cluster - it requires the IAM Role ARN output from the cluster creation.
 
 ```sh
 AWS_ACCESS_KEY_ID=<aws_access_key_id>
